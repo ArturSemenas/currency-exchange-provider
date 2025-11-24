@@ -27,14 +27,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests cache operations with real Redis instance
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 class CacheIntegrationTest extends BaseIntegrationTest {
 
-    @Container
-    static GenericContainer<?> redisContainer = new GenericContainer<>(
-            DockerImageName.parse("redis:7-alpine"))
-            .withExposedPorts(6379)
-            .withReuse(true);
+    static GenericContainer<?> redisContainer;
+
+    static {
+        redisContainer = new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
+                .withExposedPorts(6379)
+                .withReuse(true);
+        redisContainer.start();
+    }
 
     @Autowired
     private ExchangeRateCacheService cacheService;

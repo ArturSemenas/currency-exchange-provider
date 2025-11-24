@@ -13,16 +13,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Provides PostgreSQL container for all integration tests
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withReuse(true);
+    static PostgreSQLContainer<?> postgresContainer;
+
+    static {
+        postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
+                .withDatabaseName("testdb")
+                .withUsername("test")
+                .withPassword("test");
+        postgresContainer.start();
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -30,11 +32,20 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresContainer::getUsername);
         registry.add("spring.datasource.password", postgresContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         
-        // Liquibase configuration
-        registry.add("spring.liquibase.enabled", () -> "true");
+        // Disable Liquibase for tests (we'll use JPA to create schema)
+        registry.add("spring.liquibase.enabled", () -> "false");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         
-        // Disable scheduling for tests by default
+        // API provider configuration (test values)
+        registry.add("api.fixer.url", () -> "https://data.fixer.io/api");
+        registry.add("api.fixer.key", () -> "test-key");
+        registry.add("api.exchangeratesapi.url", () -> "https://v6.exchangerate-api.com/v6");
+        registry.add("api.exchangeratesapi.key", () -> "test-key");
+        
+        // Scheduling configuration
+        registry.add("exchange.rates.update.cron", () -> "0 0 * * * *"); // Dummy cron (every hour)
         registry.add("spring.task.scheduling.enabled", () -> "false");
         
         // Disable Redis cache for tests by default (can be overridden in specific tests)

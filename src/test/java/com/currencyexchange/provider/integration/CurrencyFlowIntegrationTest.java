@@ -177,7 +177,7 @@ class CurrencyFlowIntegrationTest extends BaseIntegrationTest {
         // Add historical rates (7 days ago to now, increasing trend)
         LocalDateTime now = LocalDateTime.now();
         for (int i = 7; i >= 0; i--) {
-            double rateValue = 0.80 + (i * 0.01); // 0.80, 0.81, 0.82, ..., 0.87
+            double rateValue = 0.80 + ((7 - i) * 0.01); // Day 7: 0.80, Day 0: 0.87 (increasing)
             ExchangeRate rate = ExchangeRate.builder()
                     .baseCurrency("USD")
                     .targetCurrency("EUR")
