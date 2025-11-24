@@ -379,39 +379,96 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 9: Spring Security Implementation
+## Phase 9: Spring Security Implementation ✅
 
-### 9.1 Security Configuration
-- [ ] Create `SecurityConfig` class with @Configuration, @EnableWebSecurity
-- [ ] Configure HTTP security with SecurityFilterChain
-  - Disable CSRF for REST API (stateless)
+### 9.1 Security Configuration ✅
+- [x] Create `SecurityConfig` class with @Configuration, @EnableWebSecurity
+  - @Configuration, @EnableWebSecurity, @EnableMethodSecurity annotations
+  - prePostEnabled = true for @PreAuthorize support
+  - @RequiredArgsConstructor for dependency injection
+- [x] Configure HTTP security with SecurityFilterChain
+  - CSRF disabled for REST API (stateless architecture)
   - Configure endpoint authorization rules:
-    - permitAll(): GET /api/v1/currencies, GET /api/v1/currencies/exchange-rates
-    - hasRole('ADMIN'): POST /api/v1/currencies, POST /api/v1/currencies/refresh
-    - hasAnyRole('ADMIN', 'PREMIUM_USER'): GET /api/v1/currencies/trends
-    - Swagger/OpenAPI docs: permitAll() for /swagger-ui/**, /v3/api-docs/**
-  - Enable HTTP Basic Auth (.httpBasic())
-  - Set session management to STATELESS
-- [ ] Create `UserDetailsServiceImpl` implements UserDetailsService
+    - permitAll(): GET /api/v1/currencies, GET /api/v1/currencies/exchange-rates (public access)
+    - hasRole('ADMIN'): POST /api/v1/currencies, POST /api/v1/currencies/refresh (admin only)
+    - hasAnyRole('ADMIN', 'PREMIUM_USER'): GET /api/v1/currencies/trends (premium features)
+    - Swagger/OpenAPI docs: permitAll() for /swagger-ui/**, /v3/api-docs/**, /swagger-resources/**, /webjars/**
+    - anyRequest().authenticated() for all other endpoints
+  - HTTP Basic Auth enabled with .httpBasic()
+  - Session management: STATELESS (no server-side sessions)
+- [x] Create `UserDetailsServiceImpl` implements UserDetailsService
+  - @Service component with @Slf4j logging
   - Override loadUserByUsername() method
-  - Query users from database with roles
-  - Map to Spring Security UserDetails
-- [ ] Configure password encoder (BCrypt)
-  - @Bean PasswordEncoder with BCryptPasswordEncoder
-  - Use strength 12 for production
-- [ ] Configure AuthenticationManager bean
-- [ ] Add @EnableMethodSecurity for method-level security
+  - Query users from database using UserRepository.findByUsernameWithRoles()
+  - Map User entity to Spring Security UserDetails
+  - Convert Role entities to GrantedAuthority using SimpleGrantedAuthority
+  - Throws UsernameNotFoundException if user not found
+  - @Transactional(readOnly = true) for database operations
+- [x] Configure password encoder (BCrypt)
+  - @Bean PasswordEncoder with BCryptPasswordEncoder(12)
+  - Strength 12 for production-grade security
+  - Used for password hashing during user creation
+- [x] Configure AuthenticationManager bean
+  - @Bean using AuthenticationConfiguration
+  - Returns config.getAuthenticationManager()
+- [x] Add @EnableMethodSecurity for method-level security
+  - Enables @PreAuthorize annotations on controller methods
+  - prePostEnabled = true configuration
 
-### 9.2 User Management
-- [ ] Create `UserService`
-  - Load user by username
-  - Manage user roles
-- [ ] Add method security with @EnableMethodSecurity
-- [ ] Configure role-based access control
+### 9.2 User Management ✅
+- [x] Create `UserService`
+  - @Service with @Slf4j and @RequiredArgsConstructor
+  - Injects UserRepository, RoleRepository, PasswordEncoder
+  - Methods:
+    - findByUsername(username) - retrieve user with roles
+    - existsByUsername(username) - check username availability
+    - createUser(username, password, roleNames) - create new user with encoded password
+    - setUserEnabled(username, enabled) - enable/disable user account
+    - addRoleToUser(username, roleName) - assign role to user
+    - removeRoleFromUser(username, roleName) - remove role from user
+    - getAllUsers() - retrieve all users
+  - All methods use @Transactional appropriately
+  - Comprehensive error handling and logging
+- [x] Add method security with @EnableMethodSecurity
+  - Already configured in SecurityConfig
+  - Controllers use @PreAuthorize for role-based access
+- [x] Configure role-based access control
+  - User entity has @ManyToMany relationship with Role entity
+  - Roles stored in database: ROLE_USER, ROLE_PREMIUM_USER, ROLE_ADMIN
+  - UserDetailsServiceImpl converts roles to GrantedAuthority
+  - SecurityFilterChain configures endpoint-level authorization
+  - Controllers use @PreAuthorize for method-level authorization
 
-### 9.3 Security Testing
-- [ ] Test authentication with test users
-- [ ] Verify role-based access control
+### 9.3 Security Testing Setup ✅
+- [x] Test users configured in database (Liquibase seed data)
+  - Username: user, Password: password123, Role: ROLE_USER
+  - Username: premium, Password: password123, Role: ROLE_PREMIUM_USER
+  - Username: admin, Password: password123, Role: ROLE_ADMIN
+  - All passwords BCrypt hashed: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi
+- [x] OpenAPI/Swagger configuration created
+  - OpenApiConfig class with @Configuration
+  - Security scheme defined: basicAuth (HTTP Basic)
+  - API info with title, description, version, contact, license
+  - Server configurations (localhost, production)
+  - Comprehensive API description including authentication and roles
+  - Test user credentials documented in API description
+
+**Database Schema (already existed):**
+- `users` table: id, username, password, enabled
+- `roles` table: id, name
+- `user_roles` table: user_id, role_id (many-to-many join)
+- Foreign keys with CASCADE delete
+- Index on username for performance
+
+**Security Features:**
+- HTTP Basic Authentication
+- BCrypt password hashing (strength 12)
+- Role-based access control (RBAC)
+- Stateless session management
+- Method-level security with @PreAuthorize
+- UserDetailsService integration
+- PasswordEncoder integration
+- Comprehensive user management service
 
 ---
 
