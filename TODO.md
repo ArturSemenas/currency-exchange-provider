@@ -472,22 +472,88 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 10: Exception Handling
+## Phase 10: Exception Handling ✅
 
-### 10.1 Custom Exceptions
-- [ ] Create `CurrencyNotFoundException`
-- [ ] Create `ExchangeRateNotFoundException`
-- [ ] Create `InvalidPeriodFormatException`
-- [ ] Create `ExternalApiException`
-- [ ] Create `CurrencyAlreadyExistsException`
+### 10.1 Custom Exceptions ✅
+- [x] Create `CurrencyNotFoundException`
+  - Thrown when currency code not found in system
+  - Constructor accepts currency code
+  - Returns message: "Currency not found: {code}"
+- [x] Create `ExchangeRateNotFoundException`
+  - Thrown when exchange rate not available for currency pair
+  - Constructor accepts baseCurrency and targetCurrency
+  - Returns formatted message: "Exchange rate not found for currency pair: {base} -> {target}"
+- [x] Create `InvalidPeriodFormatException`
+  - Thrown when period format invalid for trend analysis
+  - Constructor accepts invalid period string
+  - Returns detailed message with valid format examples: 12H, 7D, 3M, 1Y
+- [x] Create `ExternalApiException`
+  - Thrown when external API call fails
+  - Has provider field to identify which API failed
+  - Constructor accepts provider name and error message
+  - Returns formatted message: "External API error from {provider}: {message}"
+- [x] Create `CurrencyAlreadyExistsException`
+  - Thrown when attempting to add existing currency
+  - Constructor accepts currency code
+  - Returns message: "Currency already exists: {code}"
+- [x] Create `InsufficientDataException`
+  - Thrown when insufficient historical data for trend analysis
+  - Constructor accepts baseCurrency, targetCurrency, and period
+  - Returns formatted message with all parameters
 
-### 10.2 Global Exception Handler
-- [ ] Create `GlobalExceptionHandler` with @RestControllerAdvice
-- [ ] Handle validation exceptions (MethodArgumentNotValidException)
-- [ ] Handle constraint violations (ConstraintViolationException)
-- [ ] Handle custom exceptions with appropriate HTTP status codes
-- [ ] Return structured ErrorResponseDto
-- [ ] Add logging for exceptions
+### 10.2 Global Exception Handler ✅
+- [x] Create `GlobalExceptionHandler` with @RestControllerAdvice
+  - @RestControllerAdvice for global exception handling
+  - @Slf4j for logging all exceptions
+  - Returns structured ErrorResponseDto for all errors
+- [x] Handle validation exceptions (MethodArgumentNotValidException)
+  - Catches @Valid annotation validation failures on request bodies
+  - Extracts all field errors from BindingResult
+  - Converts to ErrorResponseDto.ValidationError list
+  - Returns 400 BAD_REQUEST with detailed validation errors
+- [x] Handle constraint violations (ConstraintViolationException)
+  - Catches @Validated parameter validation failures
+  - Extracts all constraint violations
+  - Parses property path to extract field names
+  - Converts to ErrorResponseDto.ValidationError list
+  - Returns 400 BAD_REQUEST with detailed validation errors
+- [x] Handle custom exceptions with appropriate HTTP status codes
+  - CurrencyNotFoundException → 404 NOT_FOUND
+  - ExchangeRateNotFoundException → 404 NOT_FOUND
+  - InvalidPeriodFormatException → 400 BAD_REQUEST
+  - ExternalApiException → 503 SERVICE_UNAVAILABLE
+  - CurrencyAlreadyExistsException → 409 CONFLICT
+  - InsufficientDataException → 404 NOT_FOUND
+  - IllegalArgumentException → 400 BAD_REQUEST
+  - IllegalStateException → 409 CONFLICT
+- [x] Handle security exceptions
+  - AuthenticationException → 401 UNAUTHORIZED
+  - BadCredentialsException → 401 UNAUTHORIZED
+  - AccessDeniedException → 403 FORBIDDEN
+- [x] Return structured ErrorResponseDto
+  - All exceptions return ErrorResponseDto
+  - Fields: timestamp, status, error, message, path, validationErrors
+  - Consistent error response format across all endpoints
+- [x] Add logging for exceptions
+  - log.warn() for client errors (4xx status codes)
+  - log.error() for server errors (5xx status codes)
+  - Includes exception message and stack trace where appropriate
+  - Helper method getPath() extracts request URI from WebRequest
+- [x] Global exception handler for uncaught exceptions
+  - Catches all Exception.class not handled by specific handlers
+  - Returns 500 INTERNAL_SERVER_ERROR
+  - Generic error message to avoid exposing internal details
+  - Full stack trace logged for debugging
+
+**Exception Handling Features:**
+- Centralized exception handling with @RestControllerAdvice
+- Consistent error response format (ErrorResponseDto)
+- Detailed validation error reporting
+- Proper HTTP status codes for each error type
+- Security exception handling
+- Comprehensive logging (warn for client errors, error for server errors)
+- Graceful handling of unexpected exceptions
+- Request path included in error response
 
 ---
 
