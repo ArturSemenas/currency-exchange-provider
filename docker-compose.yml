@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: currency-exchange-db
+    environment:
+      POSTGRES_DB: currency_exchange_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - currency-exchange-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: currency-exchange-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - currency-exchange-network
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:7-alpine
+    container_name: currency-exchange-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - currency-exchange-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - redis_data:/data
+
+  mock-provider-1:
+    build:
+      context: ./mock-services/mock-provider-1
+      dockerfile: Dockerfile
+    container_name: mock-provider-1
+    ports:
+      - "8091:8091"
+    networks:
+      - currency-exchange-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8091/api/v1/latest"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-provider-2:
+    build:
+      context: ./mock-services/mock-provider-2
+      dockerfile: Dockerfile
+    container_name: mock-provider-2
+    ports:
+      - "8092:8092"
+    networks:
+      - currency-exchange-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8092/v1/latest"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  currency-exchange-network:
+    driver: bridge
