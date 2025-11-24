@@ -26,10 +26,8 @@ public class CurrencyController {
 
     @PostMapping
     @Operation(summary = "Add a new currency")
-    public ResponseEntity<Currency> addCurrency(
-            @RequestParam String code,
-            @RequestParam String name) {
-        Currency currency = currencyService.addCurrency(code, name);
+    public ResponseEntity<Currency> addCurrency(@RequestParam String code) {
+        Currency currency = currencyService.addCurrency(code);
         return ResponseEntity.ok(currency);
     }
 }
