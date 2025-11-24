@@ -278,44 +278,104 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 8: REST Controllers
+## Phase 8: REST Controllers ✅
 
-### 8.1 Currency Controller
-- [ ] Create `CurrencyController`
-- [ ] Implement GET `/api/v1/currencies`
-  - Return all currencies
-  - No authentication required
-- [ ] Implement POST `/api/v1/currencies?currency=USD`
-  - Add new currency
+### 8.1 Currency Controller ✅
+- [x] Update `CurrencyController` (already existed - enhanced with DTOs)
+  - Updated to use CurrencyDto instead of Currency entity
+  - Integrated CurrencyMapper for entity-DTO conversion
+  - Added comprehensive Swagger/OpenAPI annotations
+- [x] Implement GET `/api/v1/currencies`
+  - Returns all currencies as List<CurrencyDto>
+  - No authentication required (public endpoint)
+  - Uses currencyMapper.toDtoList() for conversion
+- [x] Implement POST `/api/v1/currencies?currency=USD`
+  - Add new currency to system
   - Secured with @PreAuthorize("hasRole('ADMIN')")
-  - Validate currency code with @Pattern
-- [ ] Add Swagger/OpenAPI annotations
-- [ ] Add validation annotations
+  - Validates currency code: @NotBlank, @Size(3,3), @Pattern(^[A-Z]{3}$)
+  - Returns HTTP 201 CREATED with CurrencyDto
+  - Includes @SecurityRequirement for Swagger documentation
+- [x] Add Swagger/OpenAPI annotations
+  - @Tag for controller-level documentation
+  - @Operation with detailed descriptions
+  - @ApiResponses for all status codes (200, 201, 400, 401, 403, 500)
+  - @Parameter annotations for request parameters
+- [x] Add validation annotations
+  - @Validated on controller class
+  - @NotBlank, @Size, @Pattern on currency parameter
+  - Slf4j logging for all operations
 
-### 8.2 Exchange Rate Controller
-- [ ] Create `ExchangeRateController`
-- [ ] Implement GET `/api/v1/currencies/exchange-rates?amount=15&from=USD&to=EUR`
-  - Calculate exchange rate with amount
-  - Return converted amount for target currency
+### 8.2 Exchange Rate Controller ✅
+- [x] Create `ExchangeRateController`
+  - @RestController with @RequestMapping("/api/v1/currencies")
+  - @Validated for method parameter validation
+  - Injects ExchangeRateService
+- [x] Implement GET `/api/v1/currencies/exchange-rates?amount=15&from=USD&to=EUR`
+  - Converts amount from source to target currency
+  - Returns ConversionResponseDto with: from, to, amount, convertedAmount, rate, timestamp
   - Public endpoint (no authentication required)
-  - Validate parameters: @NotNull, @Positive for amount, @Pattern for currency codes
-- [ ] Implement POST `/api/v1/currencies/refresh`
-  - Trigger manual refresh of exchange rates
+  - Validates: @NotNull @DecimalMin(0.01) for amount, @Pattern for currency codes
+  - Returns 404 if exchange rate not found
+  - Calculates rate used: convertedAmount / amount with 6 decimal precision
+- [x] Implement POST `/api/v1/currencies/refresh`
+  - Triggers manual refresh from all providers
   - Secured with @PreAuthorize("hasRole('ADMIN')")
-  - Return status of refresh operation
-- [ ] Add Swagger annotations
-- [ ] Add request/response examples
+  - Returns RefreshResponse with message, updatedCount, timestamp
+  - Calls exchangeRateService.refreshRates()
+  - Handles exceptions and returns 500 on failure
+- [x] Add Swagger annotations
+  - Comprehensive @Operation descriptions with usage examples
+  - @ApiResponses for all endpoints (200, 400, 401, 403, 404, 500)
+  - @Schema annotations on RefreshResponse record
+  - @SecurityRequirement for secured endpoints
+- [x] Add request/response examples
+  - JSON examples in @ExampleObject for conversion response
+  - RefreshResponse example showing success format
+  - Documented all query parameters with @Parameter
 
-### 8.3 Trend Analysis Controller
-- [ ] Create `TrendController` 
-- [ ] Implement GET `/api/v1/currencies/trends?from=USD&to=EUR&period=12H`
-  - Calculate percentage change in exchange rate over specified period
+### 8.3 Trend Analysis Controller ✅
+- [x] Create `TrendController`
+  - @RestController with @RequestMapping("/api/v1/currencies/trends")
+  - @Validated for parameter validation
+  - Injects TrendAnalysisService
+- [x] Implement GET `/api/v1/currencies/trends?from=USD&to=EUR&period=12H`
+  - Calculates percentage change over specified period
   - Secured with @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER')")
-  - Validate period format: 12H (minimum), 10D, 3M, 1Y patterns
-  - Return trend as percentage (positive = appreciation, negative = depreciation)
-- [ ] Create custom @ValidPeriod annotation for period validation
-- [ ] Add Swagger annotations
-- [ ] Document period format in API docs
+  - Validates period: @Pattern(^\\d+[HDMY]$) for format
+  - Returns TrendResponseDto with: baseCurrency, targetCurrency, period, trendPercentage, description
+  - Positive % = appreciation, negative % = depreciation
+- [x] Period validation with @Pattern annotation
+  - Pattern: ^\\d+[HDMY]$ validates format
+  - H = hours (minimum 12), D = days, M = months, Y = years
+  - Examples: 12H, 7D, 3M, 1Y
+  - Custom error message explains format requirements
+- [x] Add Swagger annotations
+  - Detailed @Operation with period format documentation
+  - Multi-line description explaining period units
+  - @SecurityRequirement for role-based access
+  - @ApiResponses for all status codes (200, 400, 401, 403, 404, 500)
+  - JSON example showing trend response structure
+- [x] Document period format in API docs
+  - Comprehensive description in @Operation
+  - Example periods provided
+  - Unit explanations (H/D/M/Y)
+  - Minimum hours requirement documented
+- [x] Human-readable trend descriptions
+  - createTrendDescription() method generates natural language
+  - formatPeriodDescription() converts period codes to readable text
+  - Example: "USD appreciated by 2.35% against EUR over the last 7 days"
+  - Handles singular/plural forms (1 day vs 7 days)
+
+**Controller Features Summary:**
+- All controllers use @Validated for parameter validation
+- Comprehensive Jakarta Bean Validation annotations
+- DTOs used for all request/response bodies (no entity exposure)
+- Swagger/OpenAPI documentation with examples
+- Security annotations (@PreAuthorize) for role-based access
+- Detailed logging with Slf4j
+- Proper HTTP status codes (200, 201, 400, 401, 403, 404, 500)
+- Error handling with try-catch blocks
+- Record classes for internal response DTOs (RefreshResponse, TrendResponseDto)
 
 ---
 
