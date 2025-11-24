@@ -200,18 +200,34 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 6: Scheduled Tasks
+## Phase 6: Scheduled Tasks ✅
 
-### 6.1 Rate Update Scheduler
-- [ ] Create `ExchangeRateScheduler`
-- [ ] Add `@Scheduled` annotation for hourly updates
-- [ ] Configure scheduling in application.properties
-- [ ] Implement scheduled method to:
-  - Fetch rates from all providers
-  - Aggregate best rates
-  - Update database
-  - Update Redis cache
-- [ ] Add logging for scheduled operations
+### 6.1 Rate Update Scheduler ✅
+- [x] Create `ExchangeRateScheduler` component
+  - @Component annotation for Spring bean
+  - @Scheduled annotation with cron expression from properties
+  - Method: refreshExchangeRates() - scheduled hourly update
+  - Method: triggerManualRefresh() - for manual/admin triggers
+- [x] Add `@Scheduled` annotation for hourly updates
+  - Cron expression: `0 0 * * * *` (every hour at :00 minutes)
+  - Reads from property: `${exchange.rates.update.cron}`
+- [x] Configure scheduling in application.properties
+  - Property: `exchange.rates.update.cron=0 0 * * * *`
+  - Already configured in properties file
+- [x] Implement scheduled method to:
+  - Fetch rates from all providers using ExchangeRateService.refreshRates()
+  - Aggregate best rates (handled by service layer)
+  - Update database (handled by service layer)
+  - Update Redis cache (handled by service layer)
+  - Track execution time and log duration
+- [x] Add logging for scheduled operations
+  - Log start time with formatted timestamp
+  - Log completion with count of updated rates
+  - Log execution duration in seconds
+  - Log errors with full stack trace
+  - Formatted log sections with separators for visibility
+- [x] Enable scheduling in main application
+  - @EnableScheduling already present in CurrencyExchangeProviderApplication
 
 ---
 
