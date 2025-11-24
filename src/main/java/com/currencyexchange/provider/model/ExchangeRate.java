@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_timestamp", columnList = "timestamp")
 })
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExchangeRate {

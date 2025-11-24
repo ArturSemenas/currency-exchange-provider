@@ -120,9 +120,12 @@ public class CurrencyService {
      * Helper method to get java.util.Currency safely
      */
     private Optional<java.util.Currency> getJavaCurrency(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return Optional.empty();
+        }
         try {
             return Optional.of(java.util.Currency.getInstance(code));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return Optional.empty();
         }
     }
