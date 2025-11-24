@@ -2,6 +2,7 @@ package com.currencyexchange.provider.controller;
 
 import com.currencyexchange.provider.dto.ConversionResponseDto;
 import com.currencyexchange.provider.service.ExchangeRateService;
+import com.currencyexchange.provider.validation.ValidCurrency;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,8 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -85,14 +84,12 @@ public class ExchangeRateController {
             
             @RequestParam
             @NotBlank(message = "Source currency code cannot be blank")
-            @Size(min = 3, max = 3, message = "Source currency code must be exactly 3 characters")
-            @Pattern(regexp = "^[A-Z]{3}$", message = "Source currency code must be 3 uppercase letters")
+            @ValidCurrency
             String from,
             
             @RequestParam
             @NotBlank(message = "Target currency code cannot be blank")
-            @Size(min = 3, max = 3, message = "Target currency code must be exactly 3 characters")
-            @Pattern(regexp = "^[A-Z]{3}$", message = "Target currency code must be 3 uppercase letters")
+            @ValidCurrency
             String to) {
         
         log.info("GET /api/v1/currencies/exchange-rates?amount={}&from={}&to={}", amount, from, to);

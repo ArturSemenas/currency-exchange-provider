@@ -4,6 +4,7 @@ import com.currencyexchange.provider.dto.CurrencyDto;
 import com.currencyexchange.provider.mapper.CurrencyMapper;
 import com.currencyexchange.provider.model.Currency;
 import com.currencyexchange.provider.service.CurrencyService;
+import com.currencyexchange.provider.validation.ValidCurrency;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,8 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -72,8 +71,7 @@ public class CurrencyController {
             @Parameter(description = "ISO 4217 currency code (3 uppercase letters)", example = "USD", required = true)
             @RequestParam
             @NotBlank(message = "Currency code cannot be blank")
-            @Size(min = 3, max = 3, message = "Currency code must be exactly 3 characters")
-            @Pattern(regexp = "^[A-Z]{3}$", message = "Currency code must be 3 uppercase letters")
+            @ValidCurrency
             String currency) {
         
         log.info("POST /api/v1/currencies?currency={} - Adding new currency", currency);

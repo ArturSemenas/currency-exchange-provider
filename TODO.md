@@ -557,21 +557,30 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 11: Validation
+## Phase 11: Validation ✅
 
-### 11.1 Controller Validation
-- [ ] Add @Valid annotations on request bodies (if using POST with body)
-- [ ] Add @Validated on controller classes for method-level validation
-- [ ] Create custom validator `@ValidPeriod` for period format (12H, 10D, 3M, 1Y)
+### 11.1 Controller Validation ✅
+- [x] Add @Valid annotations on request bodies (if using POST with body)
+- [x] Add @Validated on controller classes for method-level validation
+- [x] Create custom validator `@ValidPeriod` for period format (12H, 10D, 3M, 1Y)
   - Create `PeriodValidator` class implementing ConstraintValidator
   - Support patterns: \d+H (hours, min 12), \d+D (days), \d+M (months), \d+Y (years)
-- [ ] Create custom validator `@ValidCurrency` for ISO currency codes
+- [x] Create custom validator `@ValidCurrency` for ISO currency codes
   - Validate against java.util.Currency.getAvailableCurrencies()
-- [ ] Add validation messages in messages.properties
+- [x] Add validation messages in messages.properties
   - currency.invalid=Invalid currency code. Must be valid ISO 4217 code
   - period.invalid=Invalid period format. Use format: 12H, 10D, 3M, or 1Y
   - amount.positive=Amount must be greater than 0
-- [ ] Add @NotBlank, @Pattern, @Positive where appropriate
+- [x] Add @NotBlank, @Pattern, @Positive where appropriate
+
+**Phase 11 Implementation Summary:**
+- Created `@ValidPeriod` custom annotation with `PeriodValidator` for trend period format validation (12H, 7D, 3M, 1Y)
+- Created `@ValidCurrency` custom annotation with `CurrencyValidator` using ISO 4217 codes from `java.util.Currency`
+- Added validation messages to `messages.properties`
+- Applied validators to all controller parameters (TrendController, ExchangeRateController, CurrencyController)
+- Replaced generic @Pattern and @Size with domain-specific validators
+- All controllers already had @Validated annotation
+- Project compiles successfully
 
 ---
 

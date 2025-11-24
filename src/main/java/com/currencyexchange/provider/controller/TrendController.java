@@ -1,6 +1,8 @@
 package com.currencyexchange.provider.controller;
 
 import com.currencyexchange.provider.service.TrendAnalysisService;
+import com.currencyexchange.provider.validation.ValidCurrency;
+import com.currencyexchange.provider.validation.ValidPeriod;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,8 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -90,22 +90,17 @@ public class TrendController {
     public ResponseEntity<TrendResponseDto> analyzeTrend(
             @RequestParam
             @NotBlank(message = "Base currency code cannot be blank")
-            @Size(min = 3, max = 3, message = "Base currency code must be exactly 3 characters")
-            @Pattern(regexp = "^[A-Z]{3}$", message = "Base currency code must be 3 uppercase letters")
+            @ValidCurrency
             String from,
             
             @RequestParam
             @NotBlank(message = "Target currency code cannot be blank")
-            @Size(min = 3, max = 3, message = "Target currency code must be exactly 3 characters")
-            @Pattern(regexp = "^[A-Z]{3}$", message = "Target currency code must be 3 uppercase letters")
+            @ValidCurrency
             String to,
             
             @RequestParam
             @NotBlank(message = "Period cannot be blank")
-            @Pattern(
-                    regexp = "^\\d+[HDMY]$",
-                    message = "Period format must be <number><unit> where unit is H (hours), D (days), M (months), or Y (years). Examples: 12H, 7D, 3M, 1Y"
-            )
+            @ValidPeriod
             String period) {
         
         log.info("GET /api/v1/currencies/trends?from={}&to={}&period={}", from, to, period);
