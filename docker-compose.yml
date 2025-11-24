@@ -3,15 +3,20 @@ services:
     image: postgres:16-alpine
     container_name: currency-exchange-db
     environment:
-      POSTGRES_DB: currency_exchange_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-currency_exchange_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - currency-exchange-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -40,6 +45,43 @@ services:
       retries: 3
     volumes:
       - redis_data:/data
+
+  currency-exchange-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: currency-exchange-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-currency_exchange_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      FIXER_API_KEY: ${FIXER_API_KEY:-your-api-key-here}
+      FIXER_API_BASE_URL: ${FIXER_API_BASE_URL:-http://data.fixer.io/api}
+      MOCK_PROVIDER_1_URL: ${MOCK_PROVIDER_1_URL:-http://mock-provider-1:8091}
+      MOCK_PROVIDER_2_URL: ${MOCK_PROVIDER_2_URL:-http://mock-provider-2:8092}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    networks:
+      - currency-exchange-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-provider-1:
+        condition: service_healthy
+      mock-provider-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
 
   mock-provider-1:
     build:

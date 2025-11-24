@@ -584,47 +584,70 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 12: Docker Configuration
+## Phase 12: Docker Configuration ✅
 
-### 12.1 Main Application Dockerfile
-- [ ] Create Dockerfile for main application
+### 12.1 Main Application Dockerfile ✅
+- [x] Create Dockerfile for main application
   - Multi-stage build
   - Maven build stage
   - Runtime stage with Java 21
-- [ ] Optimize Docker image size
+- [x] Optimize Docker image size
 
-### 12.2 Update Docker Compose
-- [ ] Add main application service (currency-exchange-app)
+### 12.2 Update Docker Compose ✅
+- [x] Add main application service (currency-exchange-app)
   - Build from Dockerfile
   - Expose port 8080
   - Environment variables for DB, Redis, API keys
   - depends_on: postgres, redis
   - Health check with actuator endpoint
-- [ ] Add Redis service
+- [x] Add Redis service
   - Image: redis:7-alpine
   - Expose port 6379
   - Add volume for persistence (optional)
-- [ ] Add mock-service-1
+- [x] Add mock-service-1
   - Build from mock-service-1/Dockerfile
-  - Expose port 8081
+  - Expose port 8091
   - Internal network only
-- [ ] Add mock-service-2
+- [x] Add mock-service-2
   - Build from mock-service-2/Dockerfile
-  - Expose port 8082
+  - Expose port 8092
   - Internal network only
-- [ ] Configure shared network (currency-exchange-network)
+- [x] Configure shared network (currency-exchange-network)
   - Type: bridge
   - All services connected to this network
-- [ ] Set up environment variables
+- [x] Set up environment variables
   - DB credentials, Redis host, API URLs
   - Use .env file for sensitive data
-- [ ] Configure service dependencies with depends_on
+- [x] Configure service dependencies with depends_on
   - App depends on: postgres, redis
   - App waits for healthy status with healthcheck
-- [ ] Add health checks for all services
+- [x] Add health checks for all services
   - PostgreSQL: pg_isready command
   - Redis: redis-cli ping
   - App: Spring Actuator /actuator/health
+
+**Phase 12 Implementation Summary:**
+- Created multi-stage `Dockerfile` with Maven build and Java 21 runtime
+  - Build stage: Maven 3.9 with Eclipse Temurin 21
+  - Runtime stage: Eclipse Temurin 21 JRE Alpine (minimal image)
+  - Non-root user for security
+  - Health check with wget and Spring Actuator
+- Updated `docker-compose.yml` with main application service
+  - All environment variables configurable via .env file
+  - Proper service dependencies with health check conditions
+  - Restart policy: unless-stopped
+  - Connected to currency-exchange-network
+- Created `.env.example` for environment variable documentation
+- Created `.dockerignore` to optimize build context
+- Created `DOCKER.md` with comprehensive deployment guide
+  - Quick start instructions
+  - Service URLs and ports
+  - Docker commands reference
+  - Troubleshooting guide
+  - Production considerations
+- Redis and mock providers already configured from previous phases
+- All services have health checks configured
+- Ready to deploy with `docker-compose up -d`
 
 ---
 

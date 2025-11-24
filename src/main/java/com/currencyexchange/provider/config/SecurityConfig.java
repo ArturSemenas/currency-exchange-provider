@@ -35,6 +35,9 @@ public class SecurityConfig {
                 
                 // Configure authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // Actuator health endpoint - allow anonymous access for Docker health checks
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        
                         // Public endpoints - no authentication required
                         .requestMatchers(
                                 "/api/v1/currencies",
