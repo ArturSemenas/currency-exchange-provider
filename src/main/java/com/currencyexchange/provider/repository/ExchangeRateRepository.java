@@ -21,18 +21,18 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
     /**
      * Find the latest exchange rate between two currencies
      */
-    @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency " +
-           "AND e.targetCurrency = :targetCurrency ORDER BY e.timestamp DESC LIMIT 1")
+    @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency "
+           + "AND e.targetCurrency = :targetCurrency ORDER BY e.timestamp DESC LIMIT 1")
     Optional<ExchangeRate> findLatestRate(@Param("baseCurrency") String baseCurrency, 
                                           @Param("targetCurrency") String targetCurrency);
     
     /**
      * Find all exchange rates within a time period for trend analysis
      */
-    @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency " +
-           "AND e.targetCurrency = :targetCurrency " +
-           "AND e.timestamp BETWEEN :startDate AND :endDate " +
-           "ORDER BY e.timestamp ASC")
+    @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency "
+           + "AND e.targetCurrency = :targetCurrency "
+           + "AND e.timestamp BETWEEN :startDate AND :endDate "
+           + "ORDER BY e.timestamp ASC")
     List<ExchangeRate> findRatesByPeriod(@Param("baseCurrency") String baseCurrency,
                                          @Param("targetCurrency") String targetCurrency,
                                          @Param("startDate") LocalDateTime startDate,
@@ -41,8 +41,8 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
     /**
      * Find all latest rates (one per base-target currency pair)
      */
-    @Query("SELECT e FROM ExchangeRate e WHERE e.timestamp = " +
-           "(SELECT MAX(e2.timestamp) FROM ExchangeRate e2 " +
-           "WHERE e2.baseCurrency = e.baseCurrency AND e2.targetCurrency = e.targetCurrency)")
+    @Query("SELECT e FROM ExchangeRate e WHERE e.timestamp = "
+           + "(SELECT MAX(e2.timestamp) FROM ExchangeRate e2 "
+           + "WHERE e2.baseCurrency = e.baseCurrency AND e2.targetCurrency = e.targetCurrency)")
     List<ExchangeRate> findAllLatestRates();
 }

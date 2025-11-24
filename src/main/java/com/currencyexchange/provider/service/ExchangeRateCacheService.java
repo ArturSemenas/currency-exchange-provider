@@ -78,8 +78,8 @@ public class ExchangeRateCacheService {
             Object rate = redisTemplate.opsForHash().get(key, targetCurrency);
             
             if (rate != null) {
-                BigDecimal rateValue = rate instanceof BigDecimal ? 
-                        (BigDecimal) rate : new BigDecimal(rate.toString());
+                BigDecimal rateValue = rate instanceof BigDecimal
+                        ? (BigDecimal) rate : new BigDecimal(rate.toString());
                 log.debug("Retrieved rate from cache: {} -> {} = {}", 
                         baseCurrency, targetCurrency, rateValue);
                 return Optional.of(rateValue);
@@ -107,8 +107,8 @@ public class ExchangeRateCacheService {
             
             Map<String, BigDecimal> rates = new HashMap<>();
             entries.forEach((targetCurrency, rate) -> {
-                BigDecimal rateValue = rate instanceof BigDecimal ? 
-                        (BigDecimal) rate : new BigDecimal(rate.toString());
+                BigDecimal rateValue = rate instanceof BigDecimal
+                        ? (BigDecimal) rate : new BigDecimal(rate.toString());
                 rates.put(targetCurrency.toString(), rateValue);
             });
             

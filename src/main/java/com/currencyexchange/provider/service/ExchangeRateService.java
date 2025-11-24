@@ -1,6 +1,5 @@
 package com.currencyexchange.provider.service;
 
-import com.currencyexchange.provider.client.ExchangeRateProvider;
 import com.currencyexchange.provider.model.ExchangeRate;
 import com.currencyexchange.provider.repository.ExchangeRateRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Service for managing exchange rates

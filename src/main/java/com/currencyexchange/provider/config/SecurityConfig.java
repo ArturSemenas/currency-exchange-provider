@@ -68,7 +68,7 @@ public class SecurityConfig {
                 )
                 
                 // Enable HTTP Basic Authentication
-                .httpBasic(basic -> {})
+                .httpBasic(basic -> { })
                 
                 // Set session management to STATELESS (no server-side sessions)
                 .sessionManagement(session -> 

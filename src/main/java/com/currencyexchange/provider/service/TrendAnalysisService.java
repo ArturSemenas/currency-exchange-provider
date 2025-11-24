@@ -141,7 +141,7 @@ public class TrendAnalysisService {
     /**
      * Record for storing parsed period information
      */
-    private record PeriodInfo(int amount, char unit) {}
+    private record PeriodInfo(int amount, char unit) { }
     
     /**
      * Validate period format without calculating trend

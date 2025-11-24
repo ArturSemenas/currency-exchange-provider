@@ -8,6 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CurrencyExchangeProviderApplication {
 
+    private CurrencyExchangeProviderApplication() {
+        // Private constructor to prevent instantiation
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(CurrencyExchangeProviderApplication.class, args);
     }

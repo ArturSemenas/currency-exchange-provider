@@ -18,7 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 
@@ -55,9 +58,18 @@ public class TrendController {
                     """,
             security = @SecurityRequirement(name = "basicAuth"),
             parameters = {
-                    @Parameter(name = "from", description = "Base currency code (ISO 4217)", example = "USD", required = true),
-                    @Parameter(name = "to", description = "Target currency code (ISO 4217)", example = "EUR", required = true),
-                    @Parameter(name = "period", description = "Time period (e.g., 12H, 7D, 3M, 1Y)", example = "7D", required = true)
+                    @Parameter(name = "from",
+                            description = "Base currency code (ISO 4217)",
+                            example = "USD",
+                            required = true),
+                    @Parameter(name = "to",
+                            description = "Target currency code (ISO 4217)",
+                            example = "EUR",
+                            required = true),
+                    @Parameter(name = "period",
+                            description = "Time period (e.g., 12H, 7D, 3M, 1Y)",
+                            example = "7D",
+                            required = true)
             }
     )
     @ApiResponses(value = {
@@ -81,10 +93,14 @@ public class TrendController {
                             )
                     )
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters (invalid currency code, invalid period format)"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - ADMIN or PREMIUM_USER role required"),
-            @ApiResponse(responseCode = "404", description = "Insufficient historical data for the specified period"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid parameters (invalid currency code, invalid period format)"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized - authentication required"),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden - ADMIN or PREMIUM_USER role required"),
+            @ApiResponse(responseCode = "404",
+                    description = "Insufficient historical data for the specified period"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<TrendResponseDto> analyzeTrend(
@@ -173,10 +189,11 @@ public class TrendController {
             @Schema(description = "Analysis period", example = "7D")
             String period,
             
-            @Schema(description = "Trend percentage (positive = appreciation, negative = depreciation)", example = "2.35")
+            @Schema(description = "Trend percentage (positive = appreciation, "
+                    + "negative = depreciation)", example = "2.35")
             BigDecimal trendPercentage,
             
-            @Schema(description = "Human-readable description of the trend", 
+            @Schema(description = "Human-readable description of the trend",
                     example = "USD appreciated by 2.35% against EUR over the last 7 days")
             String description
     ) {

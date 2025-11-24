@@ -21,7 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,11 +47,21 @@ public class ExchangeRateController {
     @GetMapping("/exchange-rates")
     @Operation(
             summary = "Convert currency amount",
-            description = "Calculates the converted amount from one currency to another using current exchange rates. No authentication required.",
+            description = "Calculates the converted amount from one currency to another "
+                    + "using current exchange rates. No authentication required.",
             parameters = {
-                    @Parameter(name = "amount", description = "Amount to convert (must be positive)", example = "100.00", required = true),
-                    @Parameter(name = "from", description = "Source currency code (ISO 4217)", example = "USD", required = true),
-                    @Parameter(name = "to", description = "Target currency code (ISO 4217)", example = "EUR", required = true)
+                    @Parameter(name = "amount",
+                            description = "Amount to convert (must be positive)",
+                            example = "100.00",
+                            required = true),
+                    @Parameter(name = "from",
+                            description = "Source currency code (ISO 4217)",
+                            example = "USD",
+                            required = true),
+                    @Parameter(name = "to",
+                            description = "Target currency code (ISO 4217)",
+                            example = "EUR",
+                            required = true)
             }
     )
     @ApiResponses(value = {
@@ -72,8 +86,10 @@ public class ExchangeRateController {
                             )
                     )
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters (invalid currency code, negative amount, etc.)"),
-            @ApiResponse(responseCode = "404", description = "Exchange rate not found for the specified currency pair"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid parameters (invalid currency code, negative amount, etc.)"),
+            @ApiResponse(responseCode = "404",
+                    description = "Exchange rate not found for the specified currency pair"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ConversionResponseDto> convertCurrency(
@@ -121,8 +137,9 @@ public class ExchangeRateController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Manually refresh exchange rates",
-            description = "Triggers a manual refresh of exchange rates from all providers. Requires ADMIN role. " +
-                         "This will fetch the latest rates, aggregate them, and update both database and cache.",
+            description = "Triggers a manual refresh of exchange rates from all providers. "
+                    + "Requires ADMIN role. This will fetch the latest rates, aggregate them, "
+                    + "and update both database and cache.",
             security = @SecurityRequirement(name = "basicAuth")
     )
     @ApiResponses(value = {
