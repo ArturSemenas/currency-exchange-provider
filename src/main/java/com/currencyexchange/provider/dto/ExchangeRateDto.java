@@ -7,6 +7,13 @@ import java.time.LocalDateTime;
 
 /**
  * DTO for Exchange Rate information.
+ *
+ * @param id             the unique identifier
+ * @param baseCurrency   the base currency code
+ * @param targetCurrency the target currency code
+ * @param rate           the exchange rate value
+ * @param provider       the provider name
+ * @param lastUpdated    the last update timestamp
  */
 @Schema(description = "Exchange rate information")
 public record ExchangeRateDto(

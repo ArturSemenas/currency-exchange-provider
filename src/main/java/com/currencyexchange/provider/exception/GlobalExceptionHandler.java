@@ -29,7 +29,11 @@ import java.util.Set;
 public class GlobalExceptionHandler {
 
     /**
-     * Handle currency not found exceptions
+     * Handle currency not found exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(CurrencyNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleCurrencyNotFoundException(
@@ -50,7 +54,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle exchange rate not found exceptions
+     * Handle exchange rate not found exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(ExchangeRateNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleExchangeRateNotFoundException(
@@ -71,7 +79,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle invalid period format exceptions
+     * Handle invalid period format exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(InvalidPeriodFormatException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidPeriodFormatException(
@@ -92,7 +104,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle external API exceptions
+     * Handle external API exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(ExternalApiException.class)
     public ResponseEntity<ErrorResponseDto> handleExternalApiException(
@@ -113,7 +129,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle currency already exists exceptions
+     * Handle currency already exists exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(CurrencyAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleCurrencyAlreadyExistsException(
@@ -134,7 +154,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle insufficient data exceptions
+     * Handle insufficient data exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(InsufficientDataException.class)
     public ResponseEntity<ErrorResponseDto> handleInsufficientDataException(
@@ -155,7 +179,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle validation exceptions for request body validation
+     * Handle validation exceptions for request body validation.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValid(
@@ -186,7 +214,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle constraint violation exceptions for parameter validation
+     * Handle constraint violation exceptions for parameter validation.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleConstraintViolation(
@@ -224,10 +256,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle illegal argument exceptions
+     * Handle illegal argument exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(
             IllegalArgumentException ex, WebRequest request) {
         
         log.warn("Illegal argument: {}", ex.getMessage());
@@ -245,10 +281,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle illegal state exceptions
+     * Handle illegal state exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponseDto> handleIllegalStateException(
+    public ResponseEntity<ErrorResponseDto> handleIllegalState(
             IllegalStateException ex, WebRequest request) {
         
         log.warn("Illegal state: {}", ex.getMessage());
@@ -266,7 +306,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle authentication exceptions
+     * Handle authentication exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDto> handleAuthenticationException(
@@ -287,10 +331,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle bad credentials exceptions
+     * Handle bad credentials exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(
+    public ResponseEntity<ErrorResponseDto> handleBadCredentials(
             BadCredentialsException ex, WebRequest request) {
         
         log.warn("Bad credentials: {}", ex.getMessage());
@@ -308,10 +356,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle access denied exceptions
+     * Handle access denied exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
+    public ResponseEntity<ErrorResponseDto> handleAccessDenied(
             AccessDeniedException ex, WebRequest request) {
         
         log.warn("Access denied: {}", ex.getMessage());
@@ -329,7 +381,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle all other exceptions
+     * Handle all other exceptions.
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return the error response
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGlobalException(

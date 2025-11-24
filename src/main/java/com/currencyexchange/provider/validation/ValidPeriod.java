@@ -26,7 +26,9 @@ public @interface ValidPeriod {
     Class<? extends Payload>[] payload() default {};
     
     /**
-     * Minimum hours allowed for hour-based periods
+     * Minimum hours allowed for hour-based periods.
+     *
+     * @return the minimum hours (default 12)
      */
     int minHours() default 12;
 }

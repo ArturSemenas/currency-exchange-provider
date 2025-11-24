@@ -7,6 +7,13 @@ import java.time.LocalDateTime;
 
 /**
  * DTO for currency conversion response.
+ *
+ * @param from            the base currency code
+ * @param to              the target currency code
+ * @param amount          the original amount
+ * @param convertedAmount the converted amount
+ * @param rate            the exchange rate used
+ * @param timestamp       the conversion timestamp
  */
 @Schema(description = "Currency conversion result")
 public record ConversionResponseDto(

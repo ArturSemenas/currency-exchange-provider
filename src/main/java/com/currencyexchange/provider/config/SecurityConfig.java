@@ -24,8 +24,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     /**
-     * Configure HTTP security filter chain
-     * Sets up endpoint authorization, HTTP Basic Auth, and stateless sessions
+     * Configure HTTP security filter chain.
+     * Sets up endpoint authorization, HTTP Basic Auth, and stateless sessions.
+     *
+     * @param http the HTTP security configuration
+     * @return the security filter chain
+     * @throws Exception if configuration fails
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -79,8 +83,10 @@ public class SecurityConfig {
     }
 
     /**
-     * Password encoder bean using BCrypt with strength 12
-     * BCrypt is a strong hashing algorithm designed for password hashing
+     * Password encoder bean using BCrypt with strength 12.
+     * BCrypt is a strong hashing algorithm designed for password hashing.
+     *
+     * @return the password encoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -88,8 +94,12 @@ public class SecurityConfig {
     }
 
     /**
-     * Authentication manager bean
-     * Used for authenticating users
+     * Authentication manager bean.
+     * Used for authenticating users.
+     *
+     * @param config the authentication configuration
+     * @return the authentication manager
+     * @throws Exception if configuration fails
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

@@ -12,13 +12,19 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     
     /**
-     * Find user by username with roles eagerly loaded
+     * Find user by username with roles eagerly loaded.
+     *
+     * @param username the username
+     * @return the user if found
      */
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username")
     Optional<User> findByUsernameWithRoles(@Param("username") String username);
     
     /**
-     * Check if username exists
+     * Check if username exists.
+     *
+     * @param username the username
+     * @return true if username exists
      */
     boolean existsByUsername(String username);
 }

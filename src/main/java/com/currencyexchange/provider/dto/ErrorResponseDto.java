@@ -7,6 +7,13 @@ import java.util.List;
 
 /**
  * DTO for error responses.
+ *
+ * @param timestamp         the timestamp of the error
+ * @param status            the HTTP status code
+ * @param error             the error type
+ * @param message           the error message
+ * @param path              the API path where error occurred
+ * @param validationErrors  the list of validation errors (if applicable)
  */
 @Schema(description = "Error response")
 public record ErrorResponseDto(
@@ -31,6 +38,10 @@ public record ErrorResponseDto(
 ) {
     /**
      * Validation error details.
+     *
+     * @param field         the field name
+     * @param rejectedValue the rejected value
+     * @param message       the error message
      */
     @Schema(description = "Validation error detail")
     public record ValidationError(

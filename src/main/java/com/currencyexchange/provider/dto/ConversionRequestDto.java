@@ -11,6 +11,10 @@ import java.math.BigDecimal;
 
 /**
  * DTO for currency conversion requests.
+ *
+ * @param from   the base currency code (ISO 4217)
+ * @param to     the target currency code (ISO 4217)
+ * @param amount the amount to convert
  */
 @Schema(description = "Request for currency conversion")
 public record ConversionRequestDto(

@@ -14,12 +14,19 @@ import java.util.Optional;
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
     
     /**
-     * Find all exchange rates for a given base currency
+     * Find all exchange rates for a given base currency.
+     *
+     * @param baseCurrency the base currency code
+     * @return the list of exchange rates
      */
     List<ExchangeRate> findByBaseCurrency(String baseCurrency);
     
     /**
-     * Find the latest exchange rate between two currencies
+     * Find the latest exchange rate between two currencies.
+     *
+     * @param baseCurrency   the base currency code
+     * @param targetCurrency the target currency code
+     * @return the latest exchange rate
      */
     @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency "
            + "AND e.targetCurrency = :targetCurrency ORDER BY e.timestamp DESC LIMIT 1")
@@ -27,7 +34,13 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
                                           @Param("targetCurrency") String targetCurrency);
     
     /**
-     * Find all exchange rates within a time period for trend analysis
+     * Find all exchange rates within a time period for trend analysis.
+     *
+     * @param baseCurrency   the base currency code
+     * @param targetCurrency the target currency code
+     * @param startDate      the start date of the period
+     * @param endDate        the end date of the period
+     * @return the list of exchange rates in the period
      */
     @Query("SELECT e FROM ExchangeRate e WHERE e.baseCurrency = :baseCurrency "
            + "AND e.targetCurrency = :targetCurrency "
@@ -39,7 +52,9 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
                                          @Param("endDate") LocalDateTime endDate);
     
     /**
-     * Find all latest rates (one per base-target currency pair)
+     * Find all latest rates (one per base-target currency pair).
+     *
+     * @return the list of latest exchange rates
      */
     @Query("SELECT e FROM ExchangeRate e WHERE e.timestamp = "
            + "(SELECT MAX(e2.timestamp) FROM ExchangeRate e2 "

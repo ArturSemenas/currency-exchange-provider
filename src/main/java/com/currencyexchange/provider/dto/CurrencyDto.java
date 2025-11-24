@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 
 /**
  * DTO for Currency information.
+ *
+ * @param code the currency code (ISO 4217)
+ * @param name the currency name
  */
 @Schema(description = "Currency information")
 public record CurrencyDto(

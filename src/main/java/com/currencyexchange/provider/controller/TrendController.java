@@ -176,7 +176,13 @@ public class TrendController {
     }
 
     /**
-     * Response DTO for trend analysis
+     * Response DTO for trend analysis.
+     *
+     * @param baseCurrency    the base currency code
+     * @param targetCurrency  the target currency code
+     * @param period          the analysis period
+     * @param trendPercentage the trend percentage
+     * @param description     the human-readable description of the trend
      */
     @Schema(description = "Exchange rate trend analysis result")
     public record TrendResponseDto(

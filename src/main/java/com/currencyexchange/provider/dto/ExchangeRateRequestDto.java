@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 
 /**
  * DTO for requesting exchange rates.
+ *
+ * @param baseCurrency   the base currency code (ISO 4217)
+ * @param targetCurrency the target currency code (ISO 4217)
  */
 @Schema(description = "Request for exchange rates between currencies")
 public record ExchangeRateRequestDto(

@@ -193,7 +193,11 @@ public class ExchangeRateController {
     }
 
     /**
-     * Response DTO for refresh operation
+     * Response DTO for refresh operation.
+     *
+     * @param message      the status message
+     * @param updatedCount the number of rates updated
+     * @param timestamp    the timestamp of the refresh
      */
     @Schema(description = "Response for manual refresh operation")
     public record RefreshResponse(
