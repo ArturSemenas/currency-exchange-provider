@@ -231,20 +231,50 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ---
 
-## Phase 7: DTOs and Mappers
+## Phase 7: DTOs and Mappers ✅
 
-### 7.1 Create DTOs
-- [ ] Create `CurrencyDto` record
-- [ ] Create `ExchangeRateDto` record
-- [ ] Create `ExchangeRateRequestDto`
-- [ ] Create `TrendResponseDto`
-- [ ] Create `ErrorResponseDto`
+### 7.1 Create DTOs ✅
+- [x] Create `CurrencyDto` record
+  - Fields: code (ISO 4217), name
+  - Validation: @NotBlank, @Size, @Pattern for code format
+  - Swagger @Schema annotations for API documentation
+- [x] Create `ExchangeRateDto` record
+  - Fields: id, baseCurrency, targetCurrency, rate, provider, lastUpdated
+  - Maps timestamp to lastUpdated for clarity
+- [x] Create `ExchangeRateRequestDto` record
+  - Fields: baseCurrency, targetCurrency (both required)
+  - Validation: @NotBlank, @Size(3,3), @Pattern(^[A-Z]{3}$)
+  - Used for querying exchange rates between currency pairs
+- [x] Create `ConversionRequestDto` record
+  - Fields: from, to, amount
+  - Validation: @NotBlank for currencies, @NotNull @DecimalMin(0.01) for amount
+  - Used for currency conversion operations
+- [x] Create `ConversionResponseDto` record
+  - Fields: from, to, amount, convertedAmount, rate, timestamp
+  - Returns complete conversion result with rate used
+- [x] Create `ErrorResponseDto` record
+  - Fields: timestamp, status, error, message, path, validationErrors
+  - Nested ValidationError record with field, rejectedValue, message
+  - Comprehensive error reporting for API responses
 
-### 7.2 MapStruct Mappers
-- [ ] Add MapStruct dependency
-- [ ] Create `CurrencyMapper` interface
-- [ ] Create `ExchangeRateMapper` interface
-- [ ] Configure annotation processors in pom.xml
+### 7.2 MapStruct Mappers ✅
+- [x] Add MapStruct dependency
+  - Already configured: version 1.6.3
+  - mapstruct-processor in provided scope
+- [x] Create `CurrencyMapper` interface
+  - @Mapper(componentModel = "spring")
+  - Methods: toDto, toEntity, toDtoList, updateEntityFromDto
+  - Ignores id and createdAt on entity creation
+  - NullValuePropertyMappingStrategy.IGNORE for updates
+- [x] Create `ExchangeRateMapper` interface
+  - @Mapper(componentModel = "spring")
+  - Methods: toDto, toDtoList
+  - Maps timestamp field to lastUpdated in DTO
+  - Simplified mapping (baseCurrency and targetCurrency are already String fields)
+- [x] Configure annotation processors in pom.xml
+  - Already configured: Lombok + MapStruct in annotationProcessorPaths
+  - Compilation successful: generated CurrencyMapperImpl and ExchangeRateMapperImpl
+  - Both mappers available as Spring beans via @Component
 
 ---
 
