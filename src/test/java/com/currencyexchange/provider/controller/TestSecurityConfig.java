@@ -26,8 +26,8 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/currencies").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/currencies/exchange-rates").permitAll()
                         
-                        // POST to currencies - requires ADMIN role
-                        .requestMatchers(HttpMethod.POST, "/api/v1/currencies").hasAuthority("ROLE_ADMIN")
+                        // POST to currencies - requires ADMIN authority
+                        .requestMatchers(HttpMethod.POST, "/api/v1/currencies").hasAuthority("ADMIN")
                         
                         // All other requests require authentication
                         .anyRequest().authenticated()

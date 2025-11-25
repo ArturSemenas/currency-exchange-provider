@@ -59,17 +59,14 @@ public class SecurityConfig {
                                 "/api/v1/currencies/exchange-rates"
                         ).permitAll()
                         
-                        // POST to currencies - requires ADMIN role
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/v1/currencies"
-                        ).hasAuthority("ROLE_ADMIN")
+                        // POST to currencies - requires ADMIN authority
+                        .requestMatchers(HttpMethod.POST, "/api/v1/currencies").hasAuthority("ADMIN")
                         
-                        // Refresh endpoint - requires authentication
-                        .requestMatchers("/api/v1/currencies/refresh").authenticated()
+                        // POST refresh - requires ADMIN authority
+                        .requestMatchers(HttpMethod.POST, "/api/v1/currencies/refresh").hasAuthority("ADMIN")
                         
-                        // Trend analysis - requires authentication
-                        .requestMatchers("/api/v1/currencies/trends").authenticated()
+                        // GET trends - requires ADMIN or PREMIUM_USER authority
+                        .requestMatchers(HttpMethod.GET, "/api/v1/currencies/trends").hasAnyAuthority("ADMIN", "PREMIUM_USER")
                         
                         // All other requests require authentication
                         .anyRequest().authenticated()

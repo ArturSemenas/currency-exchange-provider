@@ -9,43 +9,43 @@
     <!-- BCrypt hash (strength 12): $2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi -->
     
     <changeSet id="5" author="system">
-        <!-- Create regular user with ROLE_USER -->
+        <!-- Create regular user with USER authority -->
         <insert tableName="users">
             <column name="username" value="user"/>
             <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
         
-        <!-- Create premium user with ROLE_PREMIUM_USER -->
+        <!-- Create premium user with PREMIUM_USER authority -->
         <insert tableName="users">
             <column name="username" value="premium"/>
             <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
         
-        <!-- Create admin user with ROLE_ADMIN -->
+        <!-- Create admin user with ADMIN authority -->
         <insert tableName="users">
             <column name="username" value="admin"/>
             <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
 
-        <!-- Assign ROLE_USER to user -->
+        <!-- Assign USER to user -->
         <insert tableName="user_roles">
             <column name="user_id" valueComputed="(SELECT id FROM users WHERE username='user')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='ROLE_USER')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='USER')"/>
         </insert>
 
-        <!-- Assign ROLE_PREMIUM_USER to premium user -->
+        <!-- Assign PREMIUM_USER to premium user -->
         <insert tableName="user_roles">
             <column name="user_id" valueComputed="(SELECT id FROM users WHERE username='premium')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='ROLE_PREMIUM_USER')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='PREMIUM_USER')"/>
         </insert>
 
-        <!-- Assign ROLE_ADMIN to admin user -->
+        <!-- Assign ADMIN to admin user -->
         <insert tableName="user_roles">
             <column name="user_id" valueComputed="(SELECT id FROM users WHERE username='admin')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='ROLE_ADMIN')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='ADMIN')"/>
         </insert>
     </changeSet>
 

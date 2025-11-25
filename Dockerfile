@@ -14,7 +14,7 @@ COPY checkstyle.xml .
 COPY src ./src
 
 # Build the application (skip tests for faster builds)
-RUN mvn clean package -DskipTests -B
+RUN mvn clean package -Dmaven.test.skip=true -B
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine

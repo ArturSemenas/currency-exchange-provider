@@ -7,13 +7,13 @@
 
     <changeSet id="4" author="system">
         <insert tableName="roles">
-            <column name="name" value="ROLE_USER"/>
+            <column name="name" value="USER"/>
         </insert>
         <insert tableName="roles">
-            <column name="name" value="ROLE_PREMIUM_USER"/>
+            <column name="name" value="PREMIUM_USER"/>
         </insert>
         <insert tableName="roles">
-            <column name="name" value="ROLE_ADMIN"/>
+            <column name="name" value="ADMIN"/>
         </insert>
     </changeSet>
 
