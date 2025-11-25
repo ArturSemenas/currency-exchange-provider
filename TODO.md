@@ -383,19 +383,20 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 
 ### 9.1 Security Configuration ✅
 - [x] Create `SecurityConfig` class with @Configuration, @EnableWebSecurity
-  - @Configuration, @EnableWebSecurity, @EnableMethodSecurity annotations
-  - prePostEnabled = true for @PreAuthorize support
+  - @Configuration, @EnableWebSecurity annotations
+  - Simple authority-based security model (no ROLE_ prefix)
   - @RequiredArgsConstructor for dependency injection
 - [x] Configure HTTP security with SecurityFilterChain
   - CSRF disabled for REST API (stateless architecture)
   - Configure endpoint authorization rules:
     - permitAll(): GET /api/v1/currencies, GET /api/v1/currencies/exchange-rates (public access)
-    - hasRole('ADMIN'): POST /api/v1/currencies, POST /api/v1/currencies/refresh (admin only)
-    - hasAnyRole('ADMIN', 'PREMIUM_USER'): GET /api/v1/currencies/trends (premium features)
+    - hasAuthority('ADMIN'): POST /api/v1/currencies, POST /api/v1/currencies/refresh (admin only)
+    - hasAnyAuthority('ADMIN', 'PREMIUM_USER'): GET /api/v1/currencies/trends (premium features)
     - Swagger/OpenAPI docs: permitAll() for /swagger-ui/**, /v3/api-docs/**, /swagger-resources/**, /webjars/**
     - anyRequest().authenticated() for all other endpoints
   - HTTP Basic Auth enabled with .httpBasic()
   - Session management: STATELESS (no server-side sessions)
+  - **Method-level security removed**: No @PreAuthorize annotations used
 - [x] Create `UserDetailsServiceImpl` implements UserDetailsService
   - @Service component with @Slf4j logging
   - Override loadUserByUsername() method
@@ -411,9 +412,10 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 - [x] Configure AuthenticationManager bean
   - @Bean using AuthenticationConfiguration
   - Returns config.getAuthenticationManager()
-- [x] Add @EnableMethodSecurity for method-level security
-  - Enables @PreAuthorize annotations on controller methods
-  - prePostEnabled = true configuration
+- [x] Entity relationship fixes
+  - Removed bidirectional @ManyToMany from Role entity (users field deleted)
+  - Added @ToString.Exclude on User.roles field
+  - Changed User.roles from FetchType.LAZY to EAGER
 
 ### 9.2 User Management ✅
 - [x] Create `UserService`
@@ -434,16 +436,16 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
   - Controllers use @PreAuthorize for role-based access
 - [x] Configure role-based access control
   - User entity has @ManyToMany relationship with Role entity
-  - Roles stored in database: ROLE_USER, ROLE_PREMIUM_USER, ROLE_ADMIN
+  - Authorities stored in database: USER, PREMIUM_USER, ADMIN (no ROLE_ prefix)
   - UserDetailsServiceImpl converts roles to GrantedAuthority
   - SecurityFilterChain configures endpoint-level authorization
-  - Controllers use @PreAuthorize for method-level authorization
+  - No method-level security (@PreAuthorize removed for consistency)
 
 ### 9.3 Security Testing Setup ✅
 - [x] Test users configured in database (Liquibase seed data)
-  - Username: user, Password: password123, Role: ROLE_USER
-  - Username: premium, Password: password123, Role: ROLE_PREMIUM_USER
-  - Username: admin, Password: password123, Role: ROLE_ADMIN
+  - Username: user, Password: admin123, Authority: USER
+  - Username: premium, Password: admin123, Authority: PREMIUM_USER
+  - Username: admin, Password: admin123, Authority: ADMIN
   - All passwords BCrypt hashed: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi
 - [x] OpenAPI/Swagger configuration created
   - OpenApiConfig class with @Configuration
@@ -463,9 +465,9 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 **Security Features:**
 - HTTP Basic Authentication
 - BCrypt password hashing (strength 12)
-- Role-based access control (RBAC)
+- Authority-based access control (simple authorities without ROLE_ prefix)
 - Stateless session management
-- Method-level security with @PreAuthorize
+- Endpoint-level security with SecurityFilterChain
 - UserDetailsService integration
 - PasswordEncoder integration
 - Comprehensive user management service

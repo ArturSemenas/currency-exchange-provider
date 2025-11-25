@@ -36,12 +36,19 @@ public class OpenApiConfig {
                                 
                                 Authentication:
                                 - HTTP Basic Authentication required for secured endpoints
-                                - Test users: user/password123, premium/password123, admin/password123
+                                - Test users: user/admin123, premium/admin123, admin/admin123
                                 
-                                Roles:
-                                - ROLE_USER: Basic access
-                                - ROLE_PREMIUM_USER: Access to trend analysis
-                                - ROLE_ADMIN: Full access including currency management and manual refresh
+                                Authorities:
+                                - USER: Basic access to public endpoints
+                                - PREMIUM_USER: Access to trend analysis and public endpoints
+                                - ADMIN: Full access including currency management and manual refresh
+                                
+                                Endpoint Access:
+                                - GET /api/v1/currencies: Public (no authentication)
+                                - GET /api/v1/currencies/exchange-rates: Public (no authentication)
+                                - POST /api/v1/currencies: ADMIN only
+                                - POST /api/v1/currencies/refresh: ADMIN only
+                                - GET /api/v1/currencies/trends: ADMIN and PREMIUM_USER
                                 """)
                         .version("1.0.0")
                         .contact(new Contact()

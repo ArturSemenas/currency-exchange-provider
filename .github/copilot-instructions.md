@@ -55,8 +55,9 @@ Spring Boot 3.4.1 application that provides up-to-date currency exchange rates f
    - **Health Check**: http://localhost:8080/actuator/health
 
 6. **Test Credentials**:
-   - **User**: username: `user`, password: `password123` (ROLE_USER)
-   - **Admin**: username: `admin`, password: `password123` (ROLE_ADMIN)
+   - **User**: username: `user`, password: `admin123` (USER)
+   - **Premium User**: username: `premium`, password: `admin123` (PREMIUM_USER)
+   - **Admin**: username: `admin`, password: `admin123` (ADMIN)
 
 ## Project Structure
 
@@ -179,10 +180,20 @@ src/test/java/com/currencyexchange/provider/
 
 ### Phase 9: Spring Security ✅
 - SecurityConfig with stateless sessions
+- Simple authority-based security model (no ROLE_ prefix)
+  - Authorities stored in database: USER, PREMIUM_USER, ADMIN
+  - SecurityFilterChain uses `.hasAuthority("ADMIN")` and `.hasAnyAuthority("ADMIN", "PREMIUM_USER")`
+  - Method-level security removed (no @PreAuthorize annotations)
 - BCrypt password encoding (strength 12)
 - UserDetailsServiceImpl with custom user loading
-- Role-based access control (ROLE_USER, ROLE_ADMIN)
-- Method-level security with @PreAuthorize
+- Authority-based access control:
+  - POST /api/v1/currencies → ADMIN only
+  - POST /api/v1/currencies/refresh → ADMIN only
+  - GET /api/v1/currencies/trends → ADMIN and PREMIUM_USER
+  - GET /api/v1/currencies → Public access
+  - GET /api/v1/currencies/exchange-rates → Public access
+- Entity relationship fix: Removed bidirectional @ManyToMany from Role entity
+- User entity: Added @ToString.Exclude on roles field, changed to FetchType.EAGER
 
 ### Phase 10: Exception Handling ✅
 - Custom exceptions (CurrencyNotFoundException, ExchangeRateNotFoundException, etc.)
@@ -294,5 +305,6 @@ mvn clean verify checkstyle:check pmd:check
 ✅ **Phases 1-15 Complete**: All core features, security, validation, Docker, testing, and code quality implemented  
 📊 **Test Coverage**: 129/129 tests passing (106 unit + 23 integration)  
 📋 **Code Quality**: 145/146 Checkstyle violations fixed (99.3%), JaCoCo coverage tracking enabled  
-🚀 **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
+� **Security Model**: Simple authority-based model (USER, PREMIUM_USER, ADMIN) without ROLE_ prefix  
+�🚀 **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
 📝 **Next Phase**: Performance optimization and monitoring (Phases 16+)
