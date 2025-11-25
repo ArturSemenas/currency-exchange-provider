@@ -49,13 +49,11 @@ class UserDetailsServiceImplTest {
         roleUser = Role.builder()
                 .id(1L)
                 .name("ROLE_USER")
-                .users(new HashSet<>())
                 .build();
 
         roleAdmin = Role.builder()
                 .id(2L)
                 .name("ROLE_ADMIN")
-                .users(new HashSet<>())
                 .build();
 
         // Create test user with roles
@@ -224,7 +222,6 @@ class UserDetailsServiceImplTest {
         Role customRole = Role.builder()
                 .id(3L)
                 .name("CUSTOM_ROLE_NAME")
-                .users(new HashSet<>())
                 .build();
         testUser.getRoles().add(customRole);
 
@@ -377,7 +374,6 @@ class UserDetailsServiceImplTest {
         Role duplicateRole = Role.builder()
                 .id(4L)
                 .name("ROLE_USER")
-                .users(new HashSet<>())
                 .build();
         testUser.getRoles().add(duplicateRole);
 

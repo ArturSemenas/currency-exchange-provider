@@ -55,13 +55,11 @@ class UserServiceTest {
         userRole = Role.builder()
                 .id(1L)
                 .name("ROLE_USER")
-                .users(new HashSet<>())
                 .build();
 
         adminRole = Role.builder()
                 .id(2L)
                 .name("ROLE_ADMIN")
-                .users(new HashSet<>())
                 .build();
 
         Set<Role> roles = new HashSet<>();
