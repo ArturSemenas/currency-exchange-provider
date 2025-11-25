@@ -125,9 +125,8 @@ class CurrencyControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "GBP")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "GBP"))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code", is("GBP")))
@@ -139,13 +138,13 @@ class CurrencyControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    @DisplayName("POST /api/v1/currencies - Should return 403 without ADMIN role")
+    @DisplayName("POST /api/v1/currencies - Should return 403 when user is not ADMIN")
     void addCurrency_ShouldReturnForbidden_WhenUserIsNotAdmin() throws Exception {
         // Act & Assert
+        // User with ROLE_USER should get 403 Forbidden
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "GBP")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "GBP"))
                 .andDo(print())
                 .andExpect(status().isForbidden());
 
@@ -153,17 +152,15 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/currencies - Should return 403 without authentication")
-    void addCurrency_ShouldReturnForbidden_WhenNotAuthenticated() throws Exception {
+    @DisplayName("POST /api/v1/currencies - Should return 401 without authentication")
+    void addCurrency_ShouldReturnUnauthorized_WhenNotAuthenticated() throws Exception {
         // Act & Assert
-        // Note: With @PreAuthorize, unauthenticated requests return 403 (Forbidden)
-        // rather than 401 (Unauthorized) because the authorization check fails
+        // Without authentication, should return 401 Unauthorized (not 403)
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "GBP")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "GBP"))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         verify(currencyService, never()).addCurrency(any());
     }
@@ -176,9 +173,8 @@ class CurrencyControllerTest {
         // Note: The @ValidCurrency annotation validates at the controller level,
         // so the service is never called for invalid codes
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "XYZ")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "XYZ"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
@@ -196,9 +192,8 @@ class CurrencyControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "USD")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "USD"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
@@ -211,9 +206,8 @@ class CurrencyControllerTest {
     void addCurrency_ShouldReturnBadRequest_WhenCurrencyCodeIsBlank() throws Exception {
         // Act & Assert
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", ""))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
@@ -232,9 +226,8 @@ class CurrencyControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/currencies")
-                        .param("currency", "gbp")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("currency", "gbp"))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code", is("GBP")));

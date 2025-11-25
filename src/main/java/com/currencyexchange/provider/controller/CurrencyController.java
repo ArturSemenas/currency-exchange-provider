@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,7 +57,6 @@ public class CurrencyController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Add a new currency",
             description = "Adds a new currency to the system. Requires ADMIN role. "
@@ -73,8 +71,8 @@ public class CurrencyController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<CurrencyDto> addCurrency(
-            @Parameter(description = "ISO 4217 currency code (3 uppercase letters)", example = "USD", required = true)
-            @RequestParam
+            @Parameter(description = "ISO 4217 currency code (e.g., USD, EUR, GBP)", required = true, example = "USD")
+            @RequestParam("currency")
             @NotBlank(message = "Currency code cannot be blank")
             @ValidCurrency
             String currency) {

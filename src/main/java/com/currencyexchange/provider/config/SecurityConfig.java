@@ -3,6 +3,7 @@ package com.currencyexchange.provider.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -42,12 +43,6 @@ public class SecurityConfig {
                         // Actuator health endpoint - allow anonymous access for Docker health checks
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         
-                        // Public endpoints - no authentication required
-                        .requestMatchers(
-                                "/api/v1/currencies",
-                                "/api/v1/currencies/exchange-rates"
-                        ).permitAll()
-                        
                         // Swagger/OpenAPI documentation - public access
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -57,15 +52,24 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
                         
-                        // Admin-only endpoints
+                        // Public GET endpoints - no authentication required
                         .requestMatchers(
-                                "/api/v1/currencies/refresh"
-                        ).hasRole("ADMIN")
+                                HttpMethod.GET,
+                                "/api/v1/currencies",
+                                "/api/v1/currencies/exchange-rates"
+                        ).permitAll()
                         
-                        // Trend analysis - requires ADMIN or PREMIUM_USER role
+                        // POST to currencies - requires ADMIN role
                         .requestMatchers(
-                                "/api/v1/currencies/trends"
-                        ).hasAnyRole("ADMIN", "PREMIUM_USER")
+                                HttpMethod.POST,
+                                "/api/v1/currencies"
+                        ).hasAuthority("ROLE_ADMIN")
+                        
+                        // Refresh endpoint - requires authentication
+                        .requestMatchers("/api/v1/currencies/refresh").authenticated()
+                        
+                        // Trend analysis - requires authentication
+                        .requestMatchers("/api/v1/currencies/trends").authenticated()
                         
                         // All other requests require authentication
                         .anyRequest().authenticated()

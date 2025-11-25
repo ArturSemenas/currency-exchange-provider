@@ -5,28 +5,28 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!-- Password for all users is: password123 -->
-    <!-- BCrypt hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi -->
+    <!-- Password for all users is: admin123 -->
+    <!-- BCrypt hash (strength 12): $2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi -->
     
     <changeSet id="5" author="system">
         <!-- Create regular user with ROLE_USER -->
         <insert tableName="users">
             <column name="username" value="user"/>
-            <column name="password" value="$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi"/>
+            <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
         
         <!-- Create premium user with ROLE_PREMIUM_USER -->
         <insert tableName="users">
             <column name="username" value="premium"/>
-            <column name="password" value="$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi"/>
+            <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
         
         <!-- Create admin user with ROLE_ADMIN -->
         <insert tableName="users">
             <column name="username" value="admin"/>
-            <column name="password" value="$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5qdZRuTdvPpRi"/>
+            <column name="password" value="$2a$12$zPBRneGsZVsI5mUDNQuUiufG8xrCmc7/G7KN.m0USnBWiCqn9iQWi"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
 

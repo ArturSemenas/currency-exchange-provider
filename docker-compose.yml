@@ -61,6 +61,8 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       FIXER_API_KEY: ${FIXER_API_KEY:-your-api-key-here}
       FIXER_API_BASE_URL: ${FIXER_API_BASE_URL:-http://data.fixer.io/api}
+      EXCHANGERATESAPI_KEY: ${EXCHANGERATESAPI_KEY:-your-api-key-here}
+      EXCHANGERATESAPI_BASE_URL: ${EXCHANGERATESAPI_BASE_URL:-https://api.exchangeratesapi.io/v1}
       MOCK_PROVIDER_1_URL: ${MOCK_PROVIDER_1_URL:-http://mock-provider-1:8091}
       MOCK_PROVIDER_2_URL: ${MOCK_PROVIDER_2_URL:-http://mock-provider-2:8092}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}

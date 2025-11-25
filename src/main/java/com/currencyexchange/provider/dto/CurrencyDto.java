@@ -1,8 +1,8 @@
 package com.currencyexchange.provider.dto;
 
+import com.currencyexchange.provider.validation.ValidCurrency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -17,7 +17,7 @@ public record CurrencyDto(
         @Schema(description = "Currency code (ISO 4217)", example = "USD")
         @NotBlank(message = "Currency code cannot be blank")
         @Size(min = 3, max = 3, message = "Currency code must be exactly 3 characters")
-        @Pattern(regexp = "^[A-Z]{3}$", message = "Currency code must be 3 uppercase letters")
+        @ValidCurrency
         String code,
         
         @Schema(description = "Currency name", example = "US Dollar")

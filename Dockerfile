@@ -9,7 +9,8 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code
+# Copy checkstyle configuration and source code
+COPY checkstyle.xml .
 COPY src ./src
 
 # Build the application (skip tests for faster builds)
