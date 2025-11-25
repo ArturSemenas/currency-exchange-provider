@@ -114,7 +114,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies - Should add currency with ADMIN role")
     void addCurrency_ShouldAddCurrency_WhenUserIsAdmin() throws Exception {
         // Arrange
@@ -137,7 +137,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "USER")
     @DisplayName("POST /api/v1/currencies - Should return 403 when user is not ADMIN")
     void addCurrency_ShouldReturnForbidden_WhenUserIsNotAdmin() throws Exception {
         // Act & Assert
@@ -166,7 +166,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies - Should return 400 for invalid currency code")
     void addCurrency_ShouldReturnBadRequest_WhenInvalidCurrencyCode() throws Exception {
         // Act & Assert
@@ -183,7 +183,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies - Should return 400 when currency already exists")
     void addCurrency_ShouldReturnBadRequest_WhenCurrencyAlreadyExists() throws Exception {
         // Arrange
@@ -201,7 +201,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies - Should return 400 for blank currency code")
     void addCurrency_ShouldReturnBadRequest_WhenCurrencyCodeIsBlank() throws Exception {
         // Act & Assert
@@ -215,7 +215,7 @@ class CurrencyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies - Should accept lowercase currency code")
     void addCurrency_ShouldAcceptLowercaseCode() throws Exception {
         // Arrange

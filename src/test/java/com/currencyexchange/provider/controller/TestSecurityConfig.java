@@ -29,6 +29,12 @@ public class TestSecurityConfig {
                         // POST to currencies - requires ADMIN authority
                         .requestMatchers(HttpMethod.POST, "/api/v1/currencies").hasAuthority("ADMIN")
                         
+                        // POST to refresh exchange rates - requires ADMIN authority
+                        .requestMatchers(HttpMethod.POST, "/api/v1/currencies/refresh").hasAuthority("ADMIN")
+                        
+                        // GET trend analysis - requires ADMIN or PREMIUM_USER
+                        .requestMatchers(HttpMethod.GET, "/api/v1/currencies/trends").hasAnyAuthority("ADMIN", "PREMIUM_USER")
+                        
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )

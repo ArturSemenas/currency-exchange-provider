@@ -36,7 +36,7 @@ class TrendControllerTest {
     private TrendAnalysisService trendAnalysisService;
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return trend with ADMIN role")
     void analyzeTrend_ShouldReturnTrend_WhenUserIsAdmin() throws Exception {
         // Arrange
@@ -62,7 +62,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "PREMIUM_USER")
+    @WithMockUser(authorities = "PREMIUM_USER")
     @DisplayName("GET /api/v1/currencies/trends - Should return trend with PREMIUM_USER role")
     void analyzeTrend_ShouldReturnTrend_WhenUserIsPremium() throws Exception {
         // Arrange
@@ -83,7 +83,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "USER")
     @DisplayName("GET /api/v1/currencies/trends - Should return 403 with USER role")
     void analyzeTrend_ShouldReturn403_WhenUserIsRegularUser() throws Exception {
         // Act & Assert
@@ -112,7 +112,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 400 for invalid currency code")
     void analyzeTrend_ShouldReturn400_WhenInvalidCurrencyCode() throws Exception {
         // Act & Assert
@@ -127,7 +127,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 400 for invalid period format")
     void analyzeTrend_ShouldReturn400_WhenInvalidPeriodFormat() throws Exception {
         // Act & Assert
@@ -142,7 +142,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 400 for blank 'from' currency")
     void analyzeTrend_ShouldReturn400_WhenFromCurrencyBlank() throws Exception {
         // Act & Assert
@@ -157,7 +157,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 400 for blank 'to' currency")
     void analyzeTrend_ShouldReturn400_WhenToCurrencyBlank() throws Exception {
         // Act & Assert
@@ -172,7 +172,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 400 for blank period")
     void analyzeTrend_ShouldReturn400_WhenPeriodBlank() throws Exception {
         // Act & Assert
@@ -187,7 +187,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should handle different period formats")
     void analyzeTrend_ShouldAcceptDifferentPeriodFormats() throws Exception {
         // Arrange
@@ -228,7 +228,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should handle zero trend")
     void analyzeTrend_ShouldHandleZeroTrend() throws Exception {
         // Arrange
@@ -247,7 +247,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should handle negative trend")
     void analyzeTrend_ShouldHandleNegativeTrend() throws Exception {
         // Arrange
@@ -267,7 +267,7 @@ class TrendControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("GET /api/v1/currencies/trends - Should return 409 when insufficient data")
     void analyzeTrend_ShouldReturn409_WhenInsufficientData() throws Exception {
         // Arrange - Use valid currency GBP to avoid validation error

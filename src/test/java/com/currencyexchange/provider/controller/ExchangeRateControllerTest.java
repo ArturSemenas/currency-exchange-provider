@@ -156,7 +156,7 @@ class ExchangeRateControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies/refresh - Should refresh rates with ADMIN role")
     void refreshExchangeRates_ShouldRefreshRates_WhenUserIsAdmin() throws Exception {
         // Arrange
@@ -177,7 +177,7 @@ class ExchangeRateControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "USER")
     @DisplayName("POST /api/v1/currencies/refresh - Should return 403 without ADMIN role")
     void refreshExchangeRates_ShouldReturn403_WhenUserIsNotAdmin() throws Exception {
         // Act & Assert
@@ -204,7 +204,7 @@ class ExchangeRateControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     @DisplayName("POST /api/v1/currencies/refresh - Should return 500 when refresh fails")
     void refreshExchangeRates_ShouldReturn500_WhenRefreshFails() throws Exception {
         // Arrange
