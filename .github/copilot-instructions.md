@@ -1,7 +1,7 @@
 # Currency Exchange Rates Provider Service - Workspace Instructions
 
 ## Project Overview
-Spring Boot 3.4.1 application that provides up-to-date currency exchange rates from multiple providers (Fixer.io and ExchangeRatesAPI). Supports dynamic currency list management via REST API with hourly scheduled rate updates, Redis caching, and comprehensive testing.
+Spring Boot 3.4.1 application that provides up-to-date currency exchange rates from **4 providers** (Fixer.io, ExchangeRatesAPI, and 2 mock providers). Supports dynamic currency list management via REST API with hourly scheduled rate updates, Redis caching, multi-provider rate aggregation, and comprehensive testing.
 
 ## Technology Stack
 - **Java 21** - Modern Java features (Records, Switch Expressions, Pattern Matching)
@@ -31,9 +31,9 @@ Spring Boot 3.4.1 application that provides up-to-date currency exchange rates f
    ```bash
    docker-compose up -d
    ```
-   This starts PostgreSQL, Redis, and pgAdmin
+   This starts PostgreSQL, Redis, pgAdmin, and 2 mock exchange rate providers
 
-2. **Set API Keys** (optional - test keys provided):
+2. **Set API Keys** (optional - mock providers work without keys):
    ```bash
    export FIXER_API_KEY=your-api-key
    export EXCHANGERATESAPI_KEY=your-api-key
@@ -67,7 +67,9 @@ src/main/java/com/currencyexchange/provider/
 │   ├── ExchangeRateProvider.java (interface)
 │   ├── impl/
 │   │   ├── FixerIoProvider.java
-│   │   └── ExchangeratesApiProvider.java
+│   │   ├── ExchangeratesApiProvider.java
+│   │   ├── MockProvider1Client.java
+│   │   └── MockProvider2Client.java
 │   └── dto/            # API response DTOs
 ├── config/             # Spring configuration
 │   ├── OpenApiConfig.java
@@ -146,6 +148,8 @@ src/test/java/com/currencyexchange/provider/
 - ExchangeRateProvider interface
 - FixerIoProvider implementation (with error handling)
 - ExchangeratesApiProvider implementation
+- MockProvider1Client implementation (port 8091, /api/v1 endpoints)
+- MockProvider2Client implementation (port 8092, /v1 endpoints)
 - RestTemplate with timeouts (10s connect, 30s read)
 - API response DTOs with error handling
 
@@ -305,6 +309,7 @@ mvn clean verify checkstyle:check pmd:check
 ✅ **Phases 1-15 Complete**: All core features, security, validation, Docker, testing, and code quality implemented  
 📊 **Test Coverage**: 129/129 tests passing (106 unit + 23 integration)  
 📋 **Code Quality**: 145/146 Checkstyle violations fixed (99.3%), JaCoCo coverage tracking enabled  
-� **Security Model**: Simple authority-based model (USER, PREMIUM_USER, ADMIN) without ROLE_ prefix  
-�🚀 **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
+🔐 **Security Model**: Simple authority-based model (USER, PREMIUM_USER, ADMIN) without ROLE_ prefix  
+ **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
+🔌 **4-Provider Integration**: Successfully aggregating rates from Fixer.io, ExchangeRatesAPI, mock-provider-1, and mock-provider-2  
 📝 **Next Phase**: Performance optimization and monitoring (Phases 16+)

@@ -70,12 +70,22 @@ Full-featured Currency Exchange Rates Provider Service with Spring Boot 3.4.1, J
 - [x] Implement `ExchangeratesApiProvider`
   - Second provider implementation
   - Same interface, different API endpoint
+- [x] Implement `MockProvider1Client`
+  - Fetches from mock-provider-1:8091/api/v1
+  - Full ExchangeRateProvider interface implementation
+  - Health checks and error handling
+- [x] Implement `MockProvider2Client`
+  - Fetches from mock-provider-2:8092/v1
+  - Different endpoint paths than MockProvider1Client
+  - Complete logging and exception handling
 - [x] Create provider response DTOs
   - FixerIoResponse with error handling
   - ExchangeratesApiResponse
-- [x] Add configuration for API keys in application.properties
+- [x] Add configuration for API keys and mock URLs in application.properties
   - api.fixer.url and api.fixer.key
   - api.exchangeratesapi.url and api.exchangeratesapi.key
+  - api.mock.provider1.url with MOCK_PROVIDER_1_URL override
+  - api.mock.provider2.url with MOCK_PROVIDER_2_URL override
 - [x] Create RestClientConfig with RestTemplate bean
 
 ### 3.2 Mock Exchange Rate Services (Docker) ✅

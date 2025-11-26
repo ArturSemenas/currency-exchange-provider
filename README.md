@@ -5,12 +5,13 @@ A production-ready Spring Boot 3.4.1 application that provides up-to-date curren
 ## 🚀 Features
 
 ### Core Functionality
-- **Multi-Provider Rate Aggregation** - Fetches and compares rates from Fixer.io, ExchangeRatesAPI, and 2 mock providers
+- **Multi-Provider Rate Aggregation** - Fetches and compares rates from 4 providers (Fixer.io, ExchangeRatesAPI, mock-provider-1, mock-provider-2)
 - **Intelligent Rate Selection** - Automatically selects the best (highest) exchange rate from all providers
 - **Currency Conversion API** - Convert amounts between currencies with real-time rates
 - **Trend Analysis** - Calculate currency appreciation/depreciation over configurable periods (12H, 7D, 3M, 1Y)
 - **Scheduled Updates** - Hourly automatic refresh of exchange rates from all providers
 - **Dynamic Currency Management** - Add/remove supported currencies via REST API
+- **Mock Provider Support** - Works without external API keys using built-in mock services
 
 ### Technical Excellence
 - **Redis Caching** - 2-hour TTL cache with automatic fallback to database
@@ -47,7 +48,7 @@ A production-ready Spring Boot 3.4.1 application that provides up-to-date curren
 - **Java 21** (required)
 - **Maven 3.9+** (required)
 - **Docker Desktop** (required for PostgreSQL, Redis, and TestContainers)
-- **API Keys** (optional - test keys provided for development)
+- **API Keys** (optional - mock providers work without keys)
   - Fixer.io API key: Sign up at [https://fixer.io/](https://fixer.io/)
   - ExchangeRatesAPI key: Sign up at [https://exchangeratesapi.io/](https://exchangeratesapi.io/)
 
@@ -92,7 +93,7 @@ export FIXER_API_KEY=your-fixer-io-api-key
 export EXCHANGERATESAPI_KEY=your-exchangeratesapi-key
 ```
 
-**Note**: The application works without API keys using the 2 mock providers.
+**Note**: The application works without API keys using the 2 built-in mock providers (mock-provider-1, mock-provider-2).
 
 ### 4. Build the Application
 
@@ -368,7 +369,9 @@ src/
 │   │   │   ├── ExchangeRateProvider.java (interface)
 │   │   │   ├── impl/
 │   │   │   │   ├── FixerIoProvider.java
-│   │   │   │   └── ExchangeratesApiProvider.java
+│   │   │   │   ├── ExchangeratesApiProvider.java
+│   │   │   │   ├── MockProvider1Client.java
+│   │   │   │   └── MockProvider2Client.java
 │   │   │   └── dto/                   # API response DTOs
 │   │   ├── config/                    # Spring configuration
 │   │   │   ├── OpenApiConfig.java
@@ -847,6 +850,7 @@ server.port=8081
 - Check API quota hasn't been exceeded
 - Verify network connectivity
 - Application will fall back to mock providers if external APIs fail
+- Mock providers (mock-provider-1, mock-provider-2) work without API keys
 
 ### Getting Help
 
