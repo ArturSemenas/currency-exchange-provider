@@ -1,13 +1,13 @@
 package com.currencyexchange.provider.service;
 
 import com.currencyexchange.provider.client.ExchangeRateProvider;
+import com.currencyexchange.provider.model.Currency;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -27,19 +27,31 @@ import java.util.stream.Collectors;
 public class RateAggregationService {
     
     private final List<ExchangeRateProvider> providers;
+    private final CurrencyService currencyService;
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     
     /**
      * Aggregate best rates from all providers
      * Fetches rates concurrently from all providers and selects the best (highest) rate for each currency pair
+     * Only fetches rates for currencies that are registered in the database
      * 
      * @return map of base currency to map of target currencies to best rates
      */
     public Map<String, Map<String, BigDecimal>> aggregateBestRates() {
         log.info("Aggregating rates from {} providers", providers.size());
         
-        // Common base currencies to fetch
-        List<String> baseCurrencies = Arrays.asList("USD", "EUR", "GBP", "JPY");
+        // Get supported currencies from database
+        List<String> baseCurrencies = currencyService.getAllCurrencies().stream()
+                .map(Currency::getCode)
+                .collect(Collectors.toList());
+        
+        if (baseCurrencies.isEmpty()) {
+            log.warn("No currencies found in database. Cannot fetch exchange rates.");
+            return new HashMap<>();
+        }
+        
+        log.info("Fetching rates for {} supported currencies: {}", 
+                baseCurrencies.size(), baseCurrencies);
         
         // Fetch rates concurrently from all providers for all base currencies
         Map<String, Map<String, Map<String, BigDecimal>>> allProviderRates = 
@@ -150,10 +162,16 @@ public class RateAggregationService {
     
     /**
      * Aggregate best rates for a specific base currency
+     * Only includes target currencies that are registered in the database
      */
     private Map<String, BigDecimal> aggregateBestRatesForBase(
             String baseCurrency, 
             Map<String, Map<String, Map<String, BigDecimal>>> allProviderRates) {
+        
+        // Get list of supported currency codes for filtering
+        List<String> supportedCurrencies = currencyService.getAllCurrencies().stream()
+                .map(Currency::getCode)
+                .collect(Collectors.toList());
         
         // Collect all rates for this base currency from all providers
         Map<String, List<BigDecimal>> ratesByTarget = new HashMap<>();
@@ -161,8 +179,14 @@ public class RateAggregationService {
         allProviderRates.values().stream()
                 .map(providerRates -> providerRates.get(baseCurrency))
                 .filter(Objects::nonNull)
-                .forEach(rates -> rates.forEach((target, rate) -> 
-                        ratesByTarget.computeIfAbsent(target, k -> new ArrayList<>()).add(rate)));
+                .forEach(rates -> rates.forEach((target, rate) -> {
+                    // Only include rates for supported currencies
+                    if (supportedCurrencies.contains(target)) {
+                        ratesByTarget.computeIfAbsent(target, k -> new ArrayList<>()).add(rate);
+                    } else {
+                        log.debug("Skipping unsupported currency: {}", target);
+                    }
+                }));
         
         // Select best (max) rate for each target currency using Stream API
         return ratesByTarget.entrySet().stream()
