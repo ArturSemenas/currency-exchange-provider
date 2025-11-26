@@ -13,6 +13,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Provides PostgreSQL container for all integration tests
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseIntegrationTest {
 

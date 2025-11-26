@@ -1,6 +1,7 @@
 package com.currencyexchange.provider.service;
 
 import com.currencyexchange.provider.client.ExchangeRateProvider;
+import com.currencyexchange.provider.model.Currency;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,15 +34,26 @@ class RateAggregationServiceTest {
     @Mock
     private ExchangeRateProvider provider3;
 
+    @Mock
+    private CurrencyService currencyService;
+
     private RateAggregationService rateAggregationService;
 
     @BeforeEach
     void setUp() {
         List<ExchangeRateProvider> providers = Arrays.asList(provider1, provider2, provider3);
-        rateAggregationService = new RateAggregationService(providers);
-    }
+        rateAggregationService = new RateAggregationService(providers, currencyService);
 
-    @Test
+        // Mock supported currencies (USD, EUR, GBP, JPY, CHF) for all tests
+        List<Currency> supportedCurrencies = Arrays.asList(
+                Currency.builder().code("USD").name("US Dollar").build(),
+                Currency.builder().code("EUR").name("Euro").build(),
+                Currency.builder().code("GBP").name("British Pound").build(),
+                Currency.builder().code("JPY").name("Japanese Yen").build(),
+                Currency.builder().code("CHF").name("Swiss Franc").build()
+        );
+        lenient().when(currencyService.getAllCurrencies()).thenReturn(supportedCurrencies);
+    }    @Test
     @DisplayName("Should get rates for specific currency pair from all providers")
     void getRatesForPair_ShouldReturnRatesFromAllProviders() {
         // Arrange
