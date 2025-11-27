@@ -72,7 +72,7 @@ jobs:
           cache: 'maven'
 
       - name: Run integration tests
-        run: mvn verify -DskipUTs
+        run: mvn verify -DskipUTs -Djacoco.skip=true
         env:
           SPRING_PROFILES_ACTIVE: test
 
@@ -141,7 +141,7 @@ jobs:
           cache: 'maven'
 
       - name: Run tests with coverage
-        run: mvn clean test jacoco:report
+        run: mvn clean verify jacoco:report -Djacoco.skip=false
 
       - name: Generate coverage badge
         id: jacoco
@@ -186,7 +186,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -Djacoco.skip=true
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
