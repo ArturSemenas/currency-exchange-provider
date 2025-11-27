@@ -72,7 +72,7 @@ jobs:
           cache: 'maven'
 
       - name: Run integration tests
-        run: mvn verify -DskipTests
+        run: mvn verify -DskipUTs
         env:
           SPRING_PROFILES_ACTIVE: test
 
