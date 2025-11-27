@@ -15,7 +15,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
+        "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
+    },
+    classes = {
+        com.currencyexchange.provider.CurrencyExchangeProviderApplication.class
     }
 )
 @Testcontainers
