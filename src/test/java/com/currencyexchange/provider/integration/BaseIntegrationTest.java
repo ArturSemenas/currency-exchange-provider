@@ -12,7 +12,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Base class for integration tests with TestContainers
  * Provides PostgreSQL container for all integration tests
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
+    }
+)
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseIntegrationTest {

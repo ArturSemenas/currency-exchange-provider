@@ -26,7 +26,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration test for Redis cache with TestContainers
  * Tests cache operations with real Redis instance
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "spring.autoconfigure.exclude="
+    }
+)
 class CacheIntegrationTest extends BaseIntegrationTest {
 
     static GenericContainer<?> redisContainer;

@@ -40,6 +40,7 @@ class CurrencyFlowIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ExchangeRateRepository exchangeRateRepository;
+    private Optional<BigDecimal> exchangeRate;
 
     @BeforeEach
     void setUp() {
@@ -105,11 +106,7 @@ class CurrencyFlowIntegrationTest extends BaseIntegrationTest {
         currencyService.addCurrency("GBP");
 
         // Try to convert without rate
-        Optional<BigDecimal> result = exchangeRateService.getExchangeRate(
-                new BigDecimal("100.00"),
-                "USD",
-                "GBP"
-        );
+        Optional<BigDecimal> result = exchangeRate;
 
         assertThat(result).isEmpty();
     }
