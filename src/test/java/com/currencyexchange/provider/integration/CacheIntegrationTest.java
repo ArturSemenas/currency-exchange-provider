@@ -29,7 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
-        "spring.autoconfigure.exclude="
+        // Enable Redis autoconfiguration (override base class exclusions)
+        "spring.autoconfigure.exclude=",
+        // Disable Redis repositories (we use JPA repositories, not Redis repositories)
+        "spring.data.redis.repositories.enabled=false"
     }
 )
 class CacheIntegrationTest extends BaseIntegrationTest {
