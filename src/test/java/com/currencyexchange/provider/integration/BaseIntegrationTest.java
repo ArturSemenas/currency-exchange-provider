@@ -49,6 +49,8 @@ public abstract class BaseIntegrationTest {
         registry.add("api.fixer.key", () -> "test-key");
         registry.add("api.exchangeratesapi.url", () -> "https://v6.exchangerate-api.com/v6");
         registry.add("api.exchangeratesapi.key", () -> "test-key");
+        registry.add("api.mock.provider1.url", () -> "http://localhost:8091");
+        registry.add("api.mock.provider2.url", () -> "http://localhost:8092");
         
         // Scheduling configuration
         registry.add("exchange.rates.update.cron", () -> "0 0 * * * *"); // Dummy cron (every hour)
