@@ -43,7 +43,7 @@ class CacheIntegrationTest extends BaseIntegrationTest {
         redisContainer.start();
     }
 
-    @Autowired
+    @Autowired(required = false)
     private ExchangeRateCacheService cacheService;
 
     @Autowired(required = false)
@@ -62,6 +62,10 @@ class CacheIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Verify cache service is available (required for these tests)
+        assertThat(cacheService).isNotNull();
+        assertThat(redisTemplate).isNotNull();
+        
         // Clear cache before each test
         if (redisTemplate != null) {
             redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
