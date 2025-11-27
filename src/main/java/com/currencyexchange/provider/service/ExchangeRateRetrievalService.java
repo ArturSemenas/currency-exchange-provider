@@ -2,8 +2,8 @@ package com.currencyexchange.provider.service;
 
 import com.currencyexchange.provider.model.ExchangeRate;
 import com.currencyexchange.provider.repository.ExchangeRateRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,11 +17,17 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ExchangeRateRetrievalService {
     
     private final ExchangeRateCacheService cacheService;
     private final ExchangeRateRepository exchangeRateRepository;
+    
+    public ExchangeRateRetrievalService(
+            @Autowired(required = false) ExchangeRateCacheService cacheService,
+            ExchangeRateRepository exchangeRateRepository) {
+        this.cacheService = cacheService;
+        this.exchangeRateRepository = exchangeRateRepository;
+    }
     
     /**
      * Get exchange rate with cache fallback to database
@@ -32,11 +38,13 @@ public class ExchangeRateRetrievalService {
      * @return Optional containing the rate if found
      */
     public Optional<BigDecimal> getRate(String baseCurrency, String targetCurrency) {
-        // Try cache first
-        Optional<BigDecimal> cachedRate = cacheService.getRate(baseCurrency, targetCurrency);
-        if (cachedRate.isPresent()) {
-            log.debug("Rate found in cache: {} -> {}", baseCurrency, targetCurrency);
-            return cachedRate;
+        // Try cache first if available
+        if (cacheService != null) {
+            Optional<BigDecimal> cachedRate = cacheService.getRate(baseCurrency, targetCurrency);
+            if (cachedRate.isPresent()) {
+                log.debug("Rate found in cache: {} -> {}", baseCurrency, targetCurrency);
+                return cachedRate;
+            }
         }
         
         // Fallback to database
@@ -47,8 +55,8 @@ public class ExchangeRateRetrievalService {
                     log.info("Rate retrieved from database: {} -> {} = {}", 
                             baseCurrency, targetCurrency, rate);
                     
-                    // Store in cache for future requests
-                    if (cacheService.isAvailable()) {
+                    // Store in cache for future requests if cache is available
+                    if (cacheService != null && cacheService.isAvailable()) {
                         Map<String, BigDecimal> rateMap = new HashMap<>();
                         rateMap.put(targetCurrency, rate);
                         cacheService.storeRates(baseCurrency, rateMap);
@@ -65,11 +73,13 @@ public class ExchangeRateRetrievalService {
      * @return map of target currencies to rates
      */
     public Map<String, BigDecimal> getAllRates(String baseCurrency) {
-        // Try cache first
-        Map<String, BigDecimal> cachedRates = cacheService.getAllRates(baseCurrency);
-        if (!cachedRates.isEmpty()) {
-            log.debug("Rates found in cache for base currency: {}", baseCurrency);
-            return cachedRates;
+        // Try cache first if available
+        if (cacheService != null) {
+            Map<String, BigDecimal> cachedRates = cacheService.getAllRates(baseCurrency);
+            if (!cachedRates.isEmpty()) {
+                log.debug("Rates found in cache for base currency: {}", baseCurrency);
+                return cachedRates;
+            }
         }
         
         // Fallback to database - get all latest rates
@@ -85,8 +95,8 @@ public class ExchangeRateRetrievalService {
             log.info("Retrieved {} rates from database for base currency {}", 
                     rates.size(), baseCurrency);
             
-            // Store in cache for future requests
-            if (cacheService.isAvailable()) {
+            // Store in cache for future requests if cache is available
+            if (cacheService != null && cacheService.isAvailable()) {
                 cacheService.storeRates(baseCurrency, rates);
             }
         }
