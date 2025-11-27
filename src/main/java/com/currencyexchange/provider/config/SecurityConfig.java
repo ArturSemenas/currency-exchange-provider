@@ -66,7 +66,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/currencies/refresh").hasAuthority("ADMIN")
                         
                         // GET trends - requires ADMIN or PREMIUM_USER authority
-                        .requestMatchers(HttpMethod.GET, "/api/v1/currencies/trends").hasAnyAuthority("ADMIN", "PREMIUM_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/currencies/trends")
+                            .hasAnyAuthority("ADMIN", "PREMIUM_USER")
                         
                         // All other requests require authentication
                         .anyRequest().authenticated()
