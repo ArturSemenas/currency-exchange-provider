@@ -3,7 +3,7 @@ package com.currencyexchange.provider.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +19,11 @@ import java.time.Duration;
 
 /**
  * Redis configuration for caching exchange rates
- * Only enabled when RedisConnectionFactory is available
+ * Only enabled when RedisConnectionFactory bean is available
  */
 @Configuration
 @EnableCaching
-@ConditionalOnClass(RedisConnectionFactory.class)
+@ConditionalOnBean(RedisConnectionFactory.class)
 public class RedisConfig {
     
     @Bean

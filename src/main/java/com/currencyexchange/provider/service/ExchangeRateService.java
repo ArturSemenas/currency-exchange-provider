@@ -2,8 +2,8 @@ package com.currencyexchange.provider.service;
 
 import com.currencyexchange.provider.model.ExchangeRate;
 import com.currencyexchange.provider.repository.ExchangeRateRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +20,23 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ExchangeRateService {
     
     private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRateCacheService cacheService;
     private final ExchangeRateRetrievalService retrievalService;
     private final RateAggregationService aggregationService;
+    
+    public ExchangeRateService(
+            ExchangeRateRepository exchangeRateRepository,
+            @Autowired(required = false) ExchangeRateCacheService cacheService,
+            ExchangeRateRetrievalService retrievalService,
+            RateAggregationService aggregationService) {
+        this.exchangeRateRepository = exchangeRateRepository;
+        this.cacheService = cacheService;
+        this.retrievalService = retrievalService;
+        this.aggregationService = aggregationService;
+    }
     
     /**
      * Get exchange rate and calculate converted amount
@@ -78,9 +88,11 @@ public class ExchangeRateService {
             // Save rates to database
             int savedCount = saveRatesToDatabase(bestRates);
             
-            // Update cache
-            cacheService.evictAll();
-            cacheService.storeBestRates(bestRates);
+            // Update cache if available
+            if (cacheService != null) {
+                cacheService.evictAll();
+                cacheService.storeBestRates(bestRates);
+            }
             
             log.info("Successfully refreshed {} exchange rates", savedCount);
             return savedCount;
