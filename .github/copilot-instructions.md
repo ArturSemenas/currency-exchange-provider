@@ -16,13 +16,15 @@ Spring Boot 3.4.1 application that provides up-to-date currency exchange rates f
 - **Swagger/OpenAPI 2.7.0** - API documentation
 - **TestContainers 1.20.4** - Integration testing with PostgreSQL and Redis
 - **WireMock 3.10.0** - External API mocking for tests
-- **JaCoCo** - Code coverage reporting (planned Phase 15)
+- **JaCoCo 0.8.12** - Code coverage reporting
+- **Checkstyle 10.20.2** - Google Java Style Guide enforcement
+- **PMD 7.8.0** - Static code analysis
 
 ## Quick Start
 
 ### Prerequisites
 - **Java 21** - Required JDK version
-- **Docker Desktop** - For PostgreSQL, Redis, and TestContainers
+- **Docker Desktop OR WSL2 with Docker** - For PostgreSQL, Redis, and TestContainers
 - **Maven 3.9+** - Build tool
 
 ### Running the Application
@@ -223,9 +225,11 @@ src/test/java/com/currencyexchange/provider/
 - CurrencyServiceTest (20 tests - CRUD, validation, ISO 4217)
 - TrendAnalysisServiceTest (28 tests - parameterized period validation)
 - CurrencyControllerTest (9 tests - MockMvc, security)
+- MockProvider1ClientTest (17 tests - Fixer.io mock with error scenarios)
+- MockProvider2ClientTest (18 tests - ExchangeRatesAPI mock with error scenarios)
 - H2 in-memory database for tests
 - TestSecurityConfig for @WebMvcTest
-- **Total Unit Tests**: 106/106 passing (100%)
+- **Total Unit Tests**: 336/336 passing (100%)
 
 ### Phase 14: Integration Tests ✅
 - BaseIntegrationTest with PostgreSQL TestContainer
@@ -235,7 +239,7 @@ src/test/java/com/currencyexchange/provider/
 - Static container initialization pattern
 - TestContainers 1.20.4 with PostgreSQL 17-alpine and Redis 7-alpine
 - **Total Integration Tests**: 23/23 passing (100%)
-- **Total All Tests**: 129/129 passing (100%)
+- **Total All Tests**: 359/359 passing (100%)
 
 ### Phase 15: Code Quality & Analysis ✅
 - **JaCoCo 0.8.12**: Code coverage with 80% line, 70% branch thresholds
@@ -251,10 +255,11 @@ src/test/java/com/currencyexchange/provider/
 - **Known Exception**: 1 HideUtilityClassConstructor violation on main application class (cannot fix - Spring Boot requires public constructor)
 
 ## Test Coverage Summary
-- **Unit Tests**: 106 tests (Services, Controllers)
+- **Unit Tests**: 336 tests (Services, Controllers, Client Providers)
 - **Integration Tests**: 23 tests (Cache, Workflow, WireMock)
-- **Total Tests**: 129/129 passing (100%)
-- **Requirements**: Docker Desktop must be running for TestContainer tests
+- **Total Tests**: 359/359 passing (100%)
+- **Line Coverage**: 87% overall (client.impl: 96%, config: 0%, model: 0%)
+- **Requirements**: Docker Desktop OR WSL2 with Docker must be running for TestContainer tests
 
 ## Code Quality Standards
 
@@ -307,9 +312,10 @@ mvn clean verify checkstyle:check pmd:check
 
 ## Current Project Status
 ✅ **Phases 1-15 Complete**: All core features, security, validation, Docker, testing, and code quality implemented  
-📊 **Test Coverage**: 129/129 tests passing (106 unit + 23 integration)  
+📊 **Test Coverage**: 359/359 tests passing (336 unit + 23 integration), 87% line coverage  
 📋 **Code Quality**: 145/146 Checkstyle violations fixed (99.3%), JaCoCo coverage tracking enabled  
 🔐 **Security Model**: Simple authority-based model (USER, PREMIUM_USER, ADMIN) without ROLE_ prefix  
- **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
+✅ **Production Ready**: Application fully functional with Redis caching, scheduled updates, security, and quality gates  
 🔌 **4-Provider Integration**: Successfully aggregating rates from Fixer.io, ExchangeRatesAPI, mock-provider-1, and mock-provider-2  
+🧪 **WSL2 Support**: Comprehensive TestContainers setup for running tests with WSL2 Docker (see WSL2_TESTCONTAINERS_SETUP.md)  
 📝 **Next Phase**: Performance optimization and monitoring (Phases 16+)

@@ -612,9 +612,47 @@ mvn verify
 
 ### Test Requirements
 
-- **Docker Desktop** must be running for integration tests (TestContainers)
+- **Docker** must be running for integration tests (TestContainers)
 - Tests automatically start PostgreSQL and Redis containers
 - Containers are reused between test runs for performance
+
+### Running Tests with WSL2 Docker
+
+If you prefer using WSL2 Docker instead of Docker Desktop:
+
+**Quick Start (One Command):**
+```powershell
+.\run-tests-wsl2.ps1
+```
+
+This automated script:
+- Starts Docker in WSL2
+- Auto-detects WSL2 IP address
+- Configures TestContainers
+- Runs all Maven tests
+
+**Manual Setup:**
+```powershell
+# One-time setup
+wsl ./setup-wsl2-docker.sh
+
+# Run tests
+wsl -u root service docker start
+$wsl2Ip = (wsl hostname -I).Split(" ")[0]
+$env:DOCKER_HOST="tcp://${wsl2Ip}:2375"
+mvn clean test
+```
+
+**📚 Detailed Documentation:**
+- Quick Start: [`QUICKSTART_WSL2.md`](QUICKSTART_WSL2.md)
+- Comprehensive Guide: [`WSL2_TESTCONTAINERS_SETUP.md`](WSL2_TESTCONTAINERS_SETUP.md)
+- Setup Summary: [`WSL2_SETUP_COMPLETE.md`](WSL2_SETUP_COMPLETE.md)
+
+**Benefits of WSL2:**
+- ✅ No Docker Desktop license required
+- ✅ Lighter resource usage
+- ✅ Faster test execution
+- ✅ Automatic IP detection
 
 ## ⚙️ Configuration
 

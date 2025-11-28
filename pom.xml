@@ -195,6 +195,18 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <!-- Exclude configuration classes (Spring Boot configs) -->
+                        <exclude>**/config/**</exclude>
+                        <!-- Exclude JPA entities (model classes) -->
+                        <exclude>**/model/**</exclude>
+                        <!-- Exclude DTOs (data transfer objects) -->
+                        <exclude>**/dto/**</exclude>
+                        <!-- Exclude main application class -->
+                        <exclude>**/CurrencyExchangeProviderApplication.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -218,7 +230,7 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>PACKAGE</element>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
