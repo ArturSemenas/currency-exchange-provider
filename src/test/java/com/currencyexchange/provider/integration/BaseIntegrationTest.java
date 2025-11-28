@@ -19,7 +19,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
     },
     classes = {
-        com.currencyexchange.provider.CurrencyExchangeProviderApplication.class
+        com.currencyexchange.provider.CurrencyExchangeProviderApplication.class,
+        TestRedisConfig.class
     }
 )
 @Testcontainers
