@@ -27,13 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests cache operations with real Redis instance
  */
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        // Enable Redis autoconfiguration (override base class exclusions)
-        "spring.autoconfigure.exclude=",
-        // Disable Redis repositories (we use JPA repositories, not Redis repositories)
-        "spring.data.redis.repositories.enabled=false"
-    }
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 class CacheIntegrationTest extends BaseIntegrationTest {
 
@@ -46,7 +40,7 @@ class CacheIntegrationTest extends BaseIntegrationTest {
         redisContainer.start();
     }
 
-    @Autowired(required = false)
+    @Autowired
     private ExchangeRateCacheService cacheService;
 
     @Autowired(required = false)
@@ -65,10 +59,6 @@ class CacheIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Verify cache service is available (required for these tests)
-        assertThat(cacheService).isNotNull();
-        assertThat(redisTemplate).isNotNull();
-        
         // Clear cache before each test
         if (redisTemplate != null) {
             redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();

@@ -2,7 +2,6 @@ package com.currencyexchange.provider.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +15,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Service for caching exchange rates in Redis
  * Storage structure: Hash with key "rates:{baseCurrency}", field "{targetCurrency}", value "{rate}"
- * Only available when RedisTemplate bean exists
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(RedisTemplate.class)
 public class ExchangeRateCacheService {
     
     private static final String RATES_KEY_PREFIX = "rates:";
