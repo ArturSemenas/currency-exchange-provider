@@ -265,6 +265,7 @@ jobs:
           cat > terraform.tfvars << EOF
           allowed_ssh_cidr     = "${CIDR}"
           postgres_password    = "${{ secrets.POSTGRES_PASSWORD }}"
+          github_deploy_key    = "${{ secrets.DEPLOY_PRIVATE_KEY }}"
           EOF
 
       - name: Setup SSH key

@@ -60,3 +60,9 @@ variable "root_volume_size" {
   type        = number
   default     = 30
 }
+
+variable "github_deploy_key" {
+  description = "GitHub deploy key private key content for repository access"
+  type        = string
+  sensitive   = true
+}

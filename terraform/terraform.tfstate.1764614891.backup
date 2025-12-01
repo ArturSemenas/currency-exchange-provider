@@ -1,0 +1,150 @@
+{
+  "version": 4,
+  "terraform_version": "1.14.0",
+  "serial": 5,
+  "lineage": "cd86d41c-0495-9a95-ddbd-b09029548e09",
+  "outputs": {
+    "aws_configure_instructions": {
+      "value": "Run the following commands to configure AWS CLI:\r\n    \r\naws configure set aws_access_key_id AKIAZRNOPZYNXPTBYS44\r\naws configure set aws_secret_access_key 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\r\naws configure set region us-east-1\r\naws configure set output json\r\n    \r\nOr use interactive mode:\r\naws configure\r\n",
+      "type": "string"
+    },
+    "iam_user_arn": {
+      "value": "arn:aws:iam::655885323803:user/terraform-deploy",
+      "type": "string"
+    },
+    "iam_user_name": {
+      "value": "terraform-deploy",
+      "type": "string"
+    },
+    "terraform_access_key_id": {
+      "value": "AKIAZRNOPZYNXPTBYS44",
+      "type": "string",
+      "sensitive": true
+    },
+    "terraform_secret_access_key": {
+      "value": "1SFP5RwwoqW6B25Sg2oCTAnMJpWGsZMo9bJZtLj6",
+      "type": "string",
+      "sensitive": true
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "aws_iam_access_key",
+      "name": "terraform_deploy",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "create_date": "2025-12-01T13:41:01Z",
+            "encrypted_secret": null,
+            "encrypted_ses_smtp_password_v4": null,
+            "id": "AKIAZRNOPZYNXPTBYS44",
+            "key_fingerprint": null,
+            "pgp_key": null,
+            "secret": "1SFP5RwwoqW6B25Sg2oCTAnMJpWGsZMo9bJZtLj6",
+            "ses_smtp_password_v4": "BGjlrJO/f8xjJ4hhrUl08N5evQDuRqLcfalCrewVrGzJ",
+            "status": "Active",
+            "user": "terraform-deploy"
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "secret"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "ses_smtp_password_v4"
+              }
+            ]
+          ],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_user.terraform_deploy"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_user",
+      "name": "terraform_deploy",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::655885323803:user/terraform-deploy",
+            "force_destroy": false,
+            "id": "terraform-deploy",
+            "name": "terraform-deploy",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {
+              "Application": "currency-exchange-app",
+              "Purpose": "Terraform automation"
+            },
+            "tags_all": {
+              "Application": "currency-exchange-app",
+              "Purpose": "Terraform automation"
+            },
+            "unique_id": "AIDAZRNOPZYNRSZBOYM3Q"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_user_policy_attachment",
+      "name": "terraform_deploy_ec2",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "terraform-deploy-20251201134101331200000001",
+            "policy_arn": "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+            "user": "terraform-deploy"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_user.terraform_deploy"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_user_policy_attachment",
+      "name": "terraform_deploy_vpc",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "terraform-deploy-20251201134101641200000002",
+            "policy_arn": "arn:aws:iam::aws:policy/AmazonVPCFullAccess",
+            "user": "terraform-deploy"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_user.terraform_deploy"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
