@@ -260,11 +260,13 @@ jobs:
 
       - name: Create terraform.tfvars from secrets
         run: |
+          # Remove BOM and whitespace from CIDR block
+          CIDR=$(echo "${{ secrets.ALLOWED_SSH_CIDR }}" | sed 's/^\xEF\xBB\xBF//' | tr -d '\r' | xargs)
           cat > terraform.tfvars << EOF
           aws_region           = "us-east-1"
           instance_type        = "t2.micro"
           ssh_public_key_path  = "~/.ssh/aws-currency-exchange.pub"
-          allowed_ssh_cidr     = "${{ secrets.ALLOWED_SSH_CIDR }}"
+          allowed_ssh_cidr     = "${CIDR}"
           postgres_password    = "${{ secrets.POSTGRES_PASSWORD }}"
           fixer_api_key        = "mock"
           exchangeratesapi_key = "mock"
