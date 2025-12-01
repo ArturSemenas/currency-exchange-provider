@@ -9,13 +9,14 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "currency-exchange-terraform-state"
-    key            = "terraform.tfstate"
-    region         = "eu-north-1"
-    encrypt        = true
-    dynamodb_table = "terraform-state-lock"
-  }
+  # Temporarily disabled - S3 permissions issue
+  # backend "s3" {
+  #   bucket         = "currency-exchange-terraform-state"
+  #   key            = "terraform.tfstate"
+  #   region         = "eu-north-1"
+  #   encrypt        = true
+  #   dynamodb_table = "terraform-state-lock"
+  # }
 }
 
 provider "aws" {
