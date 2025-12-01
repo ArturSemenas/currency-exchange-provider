@@ -306,3 +306,16 @@ jobs:
           terraform output >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Output destroy results
+        if: github.event.inputs.terraform_action == 'destroy'
+        run: |
+          echo "## 🗑️ Infrastructure Destroyed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All AWS resources have been successfully removed:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ EC2 instance terminated" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Elastic IP released" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ VPC and networking deleted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Security groups removed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SSH key pair deleted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ IAM user and access keys removed" >> $GITHUB_STEP_SUMMARY
+
