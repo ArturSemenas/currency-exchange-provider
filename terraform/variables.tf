@@ -58,5 +58,5 @@ variable "exchangeratesapi_key" {
 variable "root_volume_size" {
   description = "Root EBS volume size in GB (max 30 for free tier)"
   type        = number
-  default     = 20
+  default     = 30
 }
