@@ -11,6 +11,18 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      terraform_action:
+        description: 'Terraform action (plan/apply/destroy)'
+        required: false
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - plan
+          - apply
+          - destroy
 
 # Environment variables available to all jobs
 env:
@@ -207,3 +219,88 @@ jobs:
           JAR_SIZE=$(du -h $JAR_FILE | cut -f1)
           echo "**JAR File**: $(basename $JAR_FILE)" >> $GITHUB_STEP_SUMMARY
           echo "**Size**: $JAR_SIZE" >> $GITHUB_STEP_SUMMARY
+
+  # Job 6: Deploy to AWS with Terraform (Manual)
+  terraform-deploy:
+    name: Terraform - ${{ github.event.inputs.terraform_action || 'skip' }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terraform_action != 'none'
+    defaults:
+      run:
+        working-directory: ./terraform
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.0
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Create terraform.tfvars from secrets
+        run: |
+          cat > terraform.tfvars << EOF
+          aws_region           = "us-east-1"
+          instance_type        = "t2.micro"
+          ssh_public_key_path  = "~/.ssh/aws-currency-exchange.pub"
+          allowed_ssh_cidr     = "${{ secrets.ALLOWED_SSH_CIDR }}"
+          postgres_password    = "${{ secrets.POSTGRES_PASSWORD }}"
+          fixer_api_key        = "mock"
+          exchangeratesapi_key = "mock"
+          root_volume_size     = 20
+          EOF
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-currency-exchange
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/aws-currency-exchange.pub
+          chmod 600 ~/.ssh/aws-currency-exchange
+          chmod 644 ~/.ssh/aws-currency-exchange.pub
+
+      - name: Terraform Plan
+        id: plan
+        if: github.event.inputs.terraform_action == 'plan' || github.event.inputs.terraform_action == 'apply'
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        id: apply
+        if: github.event.inputs.terraform_action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Destroy
+        id: destroy
+        if: github.event.inputs.terraform_action == 'destroy'
+        run: terraform destroy -auto-approve
+
+      - name: Output deployment results
+        if: github.event.inputs.terraform_action == 'apply'
+        run: |
+          echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          terraform output >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+

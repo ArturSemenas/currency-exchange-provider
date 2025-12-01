@@ -26,3 +26,18 @@ Thumbs.db
 # Environment files
 .env
 .env.local
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/.env
+terraform/tfplan
+terraform/destroy-plan
+
+# AWS credentials (never commit)
+.aws/
+**/credentials
+**/config

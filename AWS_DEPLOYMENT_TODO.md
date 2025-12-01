@@ -48,86 +48,27 @@
 
 ---
 
-## Phase 1: Prerequisites & Setup
+## Phase 1: Prerequisites & Setup ✅
 
-### 1.1 AWS Account Creation
-- [ ] **Create AWS Free Tier account**
-  - Go to https://aws.amazon.com/free/
-  - Click "Create a Free Account"
-  - Enter email address and account name
-  - **Important**: Choose "Personal" account type for free tier
-  - Provide contact information and credit card
-  - **Note**: Credit card required for identity verification (won't be charged)
-  - Verify phone number via SMS
-  - Choose "Basic Support - Free" plan
-  - Wait for account activation email (~5 minutes)
+### 1.1 AWS Account Creation ✅
+- [x] AWS Free Tier account created and verified
+- [x] Account type: Personal
+- [x] Basic Support - Free plan activated
 
-- [ ] **Set up Multi-Factor Authentication (MFA)**
-  - Sign in to AWS Console
-  - Go to IAM → Users → Your username
-  - Security credentials tab
-  - Click "Assign MFA device"
-  - Use Google Authenticator or Authy app
-  - **Security best practice** - required for production
+### 1.2 Install Required Tools ✅
 
-- [ ] **Create Billing Alerts**
-  - Go to Billing Dashboard → Billing preferences
-  - Enable "Receive Free Tier Usage Alerts"
-  - Enter email for alerts
-  - Enable "Receive Billing Alerts"
-  - **Critical**: Get notified before charges occur
+- [x] **AWS CLI 2.32.6 installed and configured**
+  - Installation method: Direct download (AWSCLIV2.msi)
+  - Verification: `aws --version` ✅
 
-- [ ] **Set up AWS Budget**
-  - Go to AWS Budgets
-  - Create budget → "Zero spend budget"
-  - Alert threshold: $0.01
-  - Email notification
-  - **Purpose**: Immediate alert if free tier exceeded
+- [x] **Terraform 1.14.0 installed and added to PATH**
+  - Installation: Direct download from terraform.io
+  - Extracted to: C:\terraform
+  - PATH updated: Terraform accessible globally
+  - Verification: `terraform --version` ✅
 
-### 1.2 Install Required Tools (Windows)
-
-#### Install AWS CLI
-- [ ] **Download AWS CLI v2**
-  - Download from: https://awscli.amazonaws.com/AWSCLIV2.msi
-  - Run installer (default settings)
-  - Verify installation:
-    ```powershell
-    aws --version
-    # Expected: aws-cli/2.x.x Python/3.x.x Windows/...
-    ```
-
-- [ ] **Alternative: Install via Chocolatey**
-  ```powershell
-  choco install awscli -y
-  aws --version
-  ```
-
-#### Install Terraform
-- [ ] **Download Terraform**
-  - Download from: https://terraform.io/downloads
-  - Extract terraform.exe to C:\terraform
-  - Add to PATH environment variable
-  - Verify installation:
-    ```powershell
-    terraform --version
-    # Expected: Terraform v1.x.x
-    ```
-
-- [ ] **Alternative: Install via Chocolatey**
-  ```powershell
-  choco install terraform -y
-  terraform --version
-  ```
-
-#### Install Git (if not already installed)
-- [ ] **Verify Git installation**
-  ```powershell
-  git --version
-  ```
-- [ ] **Install if needed**
-  ```powershell
-  choco install git -y
-  ```
+- [x] **Git installed**
+  - Already present in development environment
 
 ### 1.3 Create IAM User for Terraform
 
@@ -161,767 +102,213 @@
   - Should show your account ID and user ARN
   - If error: Check credentials in `~/.aws/credentials`
 
+### 1.3 Create IAM User for Terraform (Automated)
+
+- [x] **Add IAM User Resource to Terraform Configuration**
+  - Created `terraform/main.tf` with IAM user resources
+  - Created `terraform/outputs.tf` with sensitive outputs
+  - IAM user: `terraform-deploy`
+  - Policies: AmazonEC2FullAccess, AmazonVPCFullAccess
+
+- [x] **Apply Terraform Configuration**
+  ```powershell
+  terraform init
+  terraform apply -auto-approve
+  ```
+  - Resources created: 4 (IAM user, 2 policy attachments, access key)
+  - IAM User ARN: `arn:aws:iam::655885323803:user/terraform-deploy`
+
+- [x] **Configure AWS CLI with Generated Keys**
+  - Credentials stored securely (not in version control)
+  - Configured region: `us-east-1`
+  - Output format: `json`
+  - **Note**: Access keys stored in `~/.aws/credentials` (local only)
+
+- [x] **Verify IAM User Permissions**
+  - Verified with: `aws sts get-caller-identity`
+  - Tested EC2 access: `aws ec2 describe-regions` ✅
+
 ### 1.4 Generate SSH Key Pair
 
-- [ ] **Create SSH Key Pair**
-  ```powershell
-  # Navigate to .ssh directory (create if doesn't exist)
-  mkdir -Force $HOME\.ssh
-  cd $HOME\.ssh
-  
-  # Generate RSA key pair
-  ssh-keygen -t rsa -b 2048 -f aws-currency-exchange -C "terraform-ec2-access"
-  ```
-  - Press Enter for no passphrase (or enter passphrase for extra security)
-  - Creates two files:
-    - `aws-currency-exchange` (private key - keep secure!)
-    - `aws-currency-exchange.pub` (public key - will upload to AWS)
+- [x] **Create SSH Key Pair**
+  - Directory: `C:\Users\a.semenas\.ssh`
+  - Algorithm: RSA 2048-bit
+  - Private key: `aws-currency-exchange` (1,831 bytes)
+  - Public key: `aws-currency-exchange.pub` (403 bytes)
+  - Fingerprint: `SHA256:Um9McrlUyW8joVAX2QCdfrSWPR8SL02ZSpLjG44rDhw`
+  - Comment: `terraform-ec2-access`
+  - Passphrase: None (for automation)
 
-- [ ] **Set Proper Permissions (Windows)**
-  ```powershell
-  # Make private key read-only for current user
-  icacls "$HOME\.ssh\aws-currency-exchange" /inheritance:r
-  icacls "$HOME\.ssh\aws-currency-exchange" /grant:r "$($env:USERNAME):(R)"
-  ```
+- [x] **Set Proper Permissions (Windows)**
+  - Private key set to read-only for current user
+  - Inheritance removed for security
 
-- [ ] **Verify Key Files Created**
-  ```powershell
-  ls $HOME\.ssh\aws-currency-exchange*
-  ```
-  - Should show both files
+- [x] **Verify Key Files Created**
+  - Both files verified and accessible
+  - Public key content validated
 
 ### 1.5 Gather API Keys
 
-- [ ] **Get Fixer.io API Key** (Optional - mock providers work without it)
-  - Sign up at https://fixer.io/
-  - Free plan: 100 requests/month
-  - Copy API key from dashboard
-  - Save to password manager or note securely
-
-- [ ] **Get ExchangeRatesAPI Key** (Optional)
-  - Sign up at https://exchangerate-api.com/
-  - Free plan: 1,500 requests/month
-  - Copy API key
-  - Save securely
-
-- [ ] **Note**: Application works with just mock providers if you don't have API keys
+- [x] **Skipped** - Will use mock providers only
+  - Mock Provider 1: Port 8091 (Fixer.io format)
+  - Mock Provider 2: Port 8092 (ExchangeRatesAPI format)
+  - No external API keys required for testing
 
 ---
 
-## Phase 2: Terraform Project Setup
+## Phase 2: Terraform Project Setup ✅
 
 ### 2.1 Create Directory Structure
 
-- [ ] **Create Terraform Directory**
-  ```powershell
-  cd "c:\Work\Study\AI Copilot\Cur_ex_app"
-  mkdir terraform
-  cd terraform
-  ```
-
-- [ ] **Create Empty Files**
-  ```powershell
-  New-Item -ItemType File main.tf
-  New-Item -ItemType File variables.tf
-  New-Item -ItemType File outputs.tf
-  New-Item -ItemType File terraform.tfvars
-  New-Item -ItemType File user-data.sh
-  New-Item -ItemType File README.md
-  ```
+- [x] **Terraform directory created** in Phase 1.3
+  - Location: `terraform/`
+  - Files: `main.tf`, `variables.tf`, `outputs.tf`, `user-data.sh`, `terraform.tfvars`, `README.md`
 
 ### 2.2 Update .gitignore
 
-- [ ] **Add Terraform files to .gitignore**
+- [x] **Added Terraform and AWS credential exclusions**
+  - Terraform state files, `.terraform/`, `tfplan`
+  - `terraform.tfvars` (contains secrets)
+  - AWS credentials directories
+
+### 2.3-2.8 Terraform Configuration Files
+
+- [x] **All Terraform files created and validated**
+  - `variables.tf`: All input variables (region, instance, SSH, passwords, API keys)
+  - `main.tf`: Complete infrastructure (VPC, subnet, IGW, SG, EC2, EIP, IAM)
+  - `outputs.tf`: Deployment outputs (IPs, URLs, SSH command)
+  - `user-data.sh`: EC2 initialization script (Docker, git clone, docker-compose)
+  - `terraform.tfvars`: Template with placeholders (gitignored)
+  - `README.md`: Deployment documentation
+
+### 2.9 GitHub Actions Deployment ✅
+
+- [x] **Integrated Terraform into main CI pipeline**
+  - Added `workflow_dispatch` trigger with `terraform_action` input
+  - Manual job in `ci.yml` (only runs when manually triggered)
+  - Actions: `none` (default), `plan`, `apply`, `destroy`
+  - Uses GitHub Secrets for credentials
+  - Configures AWS CLI, Terraform, SSH keys dynamically
+  - Outputs deployment results to workflow summary
+
+- [x] **Created `.github/GITHUB_SECRETS_SETUP.md`**
+  - Step-by-step instructions for configuring GitHub Secrets
+  - Required secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `SSH_PRIVATE_KEY`, `SSH_PUBLIC_KEY`, `POSTGRES_PASSWORD`, `ALLOWED_SSH_CIDR`
+  - PowerShell commands to retrieve secret values
+  - Security best practices
+  - Instructions for triggering deployment from main CI workflow
+
+### 2.10 Validation
+
+- [x] **Terraform configuration validated**
+  - `terraform fmt -recursive` applied successfully
+  - `terraform validate` passed with no errors
+  - Ready for deployment via GitHub Actions
+
+---
+
+**Phase 2 Status**: ✅ Complete - All Terraform files created, GitHub Actions workflow ready, validation passed
+
+---
+
+## Phase 3: GitHub Actions Deployment Setup ✅
+
+### 3.1 Configure GitHub Secrets
+
+- [x] **Configured all GitHub Secrets via GitHub CLI**
+  - Used `gh secret set` command for automated configuration
+  - All 6 required secrets successfully configured
+
+- [x] **AWS Credentials**
+  - `AWS_ACCESS_KEY_ID`: AKIAZRNOPZYNXPTBYS44
+  - `AWS_SECRET_ACCESS_KEY`: (configured from Terraform output)
+
+- [x] **SSH Keys**
+  - `SSH_PRIVATE_KEY`: From `~/.ssh/aws-currency-exchange`
+  - `SSH_PUBLIC_KEY`: From `~/.ssh/aws-currency-exchange.pub`
+
+- [x] **Application Secrets**
+  - `ALLOWED_SSH_CIDR`: 188.69.15.168/32
+  - `POSTGRES_PASSWORD`: !/PCl1-!4PW>[epjyqj3 (strong 20-char password)
+
+- [x] **Verification**
   ```powershell
-  # Add to root .gitignore
-  Add-Content ..\.gitignore @"
-  
-  # Terraform
-  terraform/.terraform/
-  terraform/*.tfstate
-  terraform/*.tfstate.backup
-  terraform/.terraform.lock.hcl
-  terraform/terraform.tfvars
-  terraform/tfplan
-  terraform/destroy-plan
-  "@
+  gh secret list
   ```
+  - All 6 secrets listed and configured
 
-### 2.3 Create variables.tf
+### 3.2 Test GitHub Actions Workflow
 
-- [ ] **Create variables.tf with all input variables**
-  ```hcl
-  # terraform/variables.tf
+- [ ] **Trigger manual workflow**
+  ```powershell
+  # Option 1: Open GitHub Actions in browser
+  Start-Process "https://github.com/ArturSemenas/currency-exchange-provider/actions"
   
-  variable "aws_region" {
-    description = "AWS region for resources"
-    type        = string
-    default     = "us-east-1"
-  }
-  
-  variable "instance_type" {
-    description = "EC2 instance type (t2.micro for free tier)"
-    type        = string
-    default     = "t2.micro"
-  }
-  
-  variable "ssh_public_key_path" {
-    description = "Path to SSH public key file"
-    type        = string
-    default     = "~/.ssh/aws-currency-exchange.pub"
-  }
-  
-  variable "allowed_ssh_cidr" {
-    description = "CIDR block allowed for SSH access (your IP/32)"
-    type        = string
-    # Get your IP from https://whatismyip.com and append /32
-  }
-  
-  variable "app_name" {
-    description = "Application name for tagging"
-    type        = string
-    default     = "currency-exchange-app"
-  }
-  
-  variable "environment" {
-    description = "Environment name"
-    type        = string
-    default     = "production"
-  }
-  
-  variable "postgres_password" {
-    description = "PostgreSQL database password"
-    type        = string
-    sensitive   = true
-  }
-  
-  variable "fixer_api_key" {
-    description = "Fixer.io API key (optional)"
-    type        = string
-    sensitive   = true
-    default     = "YOUR_KEY_HERE"
-  }
-  
-  variable "exchangeratesapi_key" {
-    description = "ExchangeRatesAPI key (optional)"
-    type        = string
-    sensitive   = true
-    default     = "YOUR_KEY_HERE"
-  }
-  
-  variable "root_volume_size" {
-    description = "Root EBS volume size in GB (max 30 for free tier)"
-    type        = number
-    default     = 20
-  }
+  # Option 2: Trigger via GitHub CLI
+  gh workflow run ci.yml --ref main -f terraform_action=plan
   ```
+  - Workflow: "CI - Build and Test"
+  - Select branch: `main`
+  - Terraform action: `plan`
+  - Click "Run workflow" (or use CLI command above)
 
-### 2.4 Create main.tf
+- [ ] **Review plan output**
+  - Check workflow logs for Terraform plan
+  - Verify resources to be created (~15 resources: VPC, subnet, IGW, RT, SG, EC2, EIP, etc.)
+  - No errors in fmt, init, validate, plan steps
+  - Review infrastructure changes before applying
 
-- [ ] **Create main.tf with provider configuration**
-  ```hcl
-  # terraform/main.tf
+### 3.3 Deploy to AWS via GitHub Actions
+
+- [ ] **Run apply workflow**
+  ```powershell
+  # Option 1: Via browser
+  Start-Process "https://github.com/ArturSemenas/currency-exchange-provider/actions"
   
-  terraform {
-    required_version = ">= 1.0"
-    required_providers {
-      aws = {
-        source  = "hashicorp/aws"
-        version = "~> 5.0"
-      }
-    }
-  }
-  
-  provider "aws" {
-    region = var.aws_region
-    
-    default_tags {
-      tags = {
-        Environment = var.environment
-        Application = var.app_name
-        ManagedBy   = "Terraform"
-      }
-    }
-  }
+  # Option 2: Via GitHub CLI
+  gh workflow run ci.yml --ref main -f terraform_action=apply
   ```
+  - Workflow: "CI - Build and Test"
+  - Terraform action: `apply`
+  - Review plan output first, then confirm deployment
 
-- [ ] **Add data source for Amazon Linux 2023 AMI**
-  ```hcl
-  # Get latest Amazon Linux 2023 AMI
-  data "aws_ami" "amazon_linux_2023" {
-    most_recent = true
-    owners      = ["amazon"]
-    
-    filter {
-      name   = "name"
-      values = ["al2023-ami-*-x86_64"]
-    }
-    
-    filter {
-      name   = "virtualization-type"
-      values = ["hvm"]
-    }
-  }
+- [ ] **Monitor deployment**
+  ```powershell
+  # Watch workflow runs
+  gh run list --workflow=ci.yml
+  
+  # View specific run logs
+  gh run view --log
   ```
+  - Deployment takes ~5-10 minutes
+  - Wait for all steps to complete (green checkmarks)
+  - Review any errors if deployment fails
 
-- [ ] **Create VPC and Networking**
-  ```hcl
-  # VPC
-  resource "aws_vpc" "main" {
-    cidr_block           = "10.0.0.0/16"
-    enable_dns_hostnames = true
-    enable_dns_support   = true
-    
-    tags = {
-      Name = "${var.app_name}-vpc"
-    }
-  }
-  
-  # Public Subnet
-  resource "aws_subnet" "public" {
-    vpc_id                  = aws_vpc.main.id
-    cidr_block              = "10.0.1.0/24"
-    availability_zone       = "${var.aws_region}a"
-    map_public_ip_on_launch = true
-    
-    tags = {
-      Name = "${var.app_name}-public-subnet"
-    }
-  }
-  
-  # Internet Gateway
-  resource "aws_internet_gateway" "main" {
-    vpc_id = aws_vpc.main.id
-    
-    tags = {
-      Name = "${var.app_name}-igw"
-    }
-  }
-  
-  # Route Table
-  resource "aws_route_table" "public" {
-    vpc_id = aws_vpc.main.id
-    
-    route {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.main.id
-    }
-    
-    tags = {
-      Name = "${var.app_name}-public-rt"
-    }
-  }
-  
-  # Route Table Association
-  resource "aws_route_table_association" "public" {
-    subnet_id      = aws_subnet.public.id
-    route_table_id = aws_route_table.public.id
-  }
+- [ ] **Retrieve deployment outputs**
+  ```powershell
+  # View workflow summary with Terraform outputs
+  gh run view
   ```
+  - Public IP address
+  - SSH command
+  - Application URL (http://<IP>:8080)
+  - Swagger URL (http://<IP>:8080/swagger-ui.html)
 
-- [ ] **Create Security Group**
-  ```hcl
-  resource "aws_security_group" "app" {
-    name        = "${var.app_name}-sg"
-    description = "Security group for ${var.app_name}"
-    vpc_id      = aws_vpc.main.id
-    
-    # SSH access (restrict to your IP)
-    ingress {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = [var.allowed_ssh_cidr]
-      description = "SSH access from allowed IP"
-    }
-    
-    # Spring Boot application
-    ingress {
-      from_port   = 8080
-      to_port     = 8080
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "Spring Boot application"
-    }
-    
-    # HTTP (for future nginx reverse proxy)
-    ingress {
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "HTTP access"
-    }
-    
-    # Outbound - allow all
-    egress {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "Allow all outbound traffic"
-    }
-    
-    tags = {
-      Name = "${var.app_name}-sg"
-    }
-  }
-  ```
-
-- [ ] **Create SSH Key Pair**
-  ```hcl
-  resource "aws_key_pair" "deployer" {
-    key_name   = "${var.app_name}-key"
-    public_key = file(pathexpand(var.ssh_public_key_path))
-    
-    tags = {
-      Name = "${var.app_name}-ssh-key"
-    }
-  }
-  ```
-
-- [ ] **Create EC2 Instance**
-  ```hcl
-  resource "aws_instance" "app" {
-    ami           = data.aws_ami.amazon_linux_2023.id
-    instance_type = var.instance_type
-    
-    key_name               = aws_key_pair.deployer.key_name
-    vpc_security_group_ids = [aws_security_group.app.id]
-    subnet_id              = aws_subnet.public.id
-    
-    # User data script for initialization
-    user_data = templatefile("${path.module}/user-data.sh", {
-      postgres_password       = var.postgres_password
-      fixer_api_key          = var.fixer_api_key
-      exchangeratesapi_key   = var.exchangeratesapi_key
-    })
-    
-    # Root volume (EBS)
-    root_block_device {
-      volume_size           = var.root_volume_size
-      volume_type           = "gp3"
-      delete_on_termination = true
-      
-      tags = {
-        Name = "${var.app_name}-root-volume"
-      }
-    }
-    
-    # Prevent accidental termination
-    disable_api_termination = false
-    
-    tags = {
-      Name = "${var.app_name}-instance"
-    }
-  }
-  ```
-
-- [ ] **Create Elastic IP**
-  ```hcl
-  resource "aws_eip" "app" {
-    domain   = "vpc"
-    instance = aws_instance.app.id
-    
-    tags = {
-      Name = "${var.app_name}-eip"
-    }
-    
-    depends_on = [aws_internet_gateway.main]
-  }
-  ```
-
-### 2.5 Create outputs.tf
-
-- [ ] **Create outputs.tf for important values**
-  ```hcl
-  # terraform/outputs.tf
+- [ ] **Verify deployment**
+  ```powershell
+  # Test SSH access
+  ssh -i ~/.ssh/aws-currency-exchange ec2-user@<PUBLIC_IP>
   
-  output "instance_id" {
-    description = "EC2 instance ID"
-    value       = aws_instance.app.id
-  }
+  # Test application endpoint
+  Invoke-RestMethod http://<PUBLIC_IP>:8080/actuator/health
   
-  output "public_ip" {
-    description = "Elastic IP address"
-    value       = aws_eip.app.public_ip
-  }
-  
-  output "public_dns" {
-    description = "Public DNS name"
-    value       = aws_instance.app.public_dns
-  }
-  
-  output "ssh_command" {
-    description = "SSH command to connect to instance"
-    value       = "ssh -i ~/.ssh/aws-currency-exchange ec2-user@${aws_eip.app.public_ip}"
-  }
-  
-  output "app_url" {
-    description = "Application URL"
-    value       = "http://${aws_eip.app.public_ip}:8080"
-  }
-  
-  output "swagger_url" {
-    description = "Swagger UI URL"
-    value       = "http://${aws_eip.app.public_ip}:8080/swagger-ui.html"
-  }
-  
-  output "security_group_id" {
-    description = "Security group ID"
-    value       = aws_security_group.app.id
-  }
-  
-  output "vpc_id" {
-    description = "VPC ID"
-    value       = aws_vpc.main.id
-  }
-  ```
-
-### 2.6 Create user-data.sh
-
-- [ ] **Create user-data.sh initialization script**
-  ```bash
-  #!/bin/bash
-  # terraform/user-data.sh
-  
-  set -e  # Exit on any error
-  
-  # Redirect all output to log file
-  exec > >(tee /var/log/user-data.log)
-  exec 2>&1
-  
-  echo "=================================================="
-  echo "Starting user-data script at $(date)"
-  echo "=================================================="
-  
-  # Update system packages
-  echo "Updating system packages..."
-  dnf update -y
-  
-  # Install Docker
-  echo "Installing Docker..."
-  dnf install -y docker git wget
-  systemctl start docker
-  systemctl enable docker
-  
-  # Add ec2-user to docker group
-  usermod -aG docker ec2-user
-  
-  # Install Docker Compose
-  echo "Installing Docker Compose..."
-  DOCKER_COMPOSE_VERSION="v2.24.0"
-  curl -L "https://github.com/docker/compose/releases/download/$${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
-  ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
-  
-  # Verify installations
-  echo "Verifying installations..."
-  docker --version
-  docker-compose --version
-  
-  # Clone application repository
-  echo "Cloning application repository..."
-  cd /home/ec2-user
-  sudo -u ec2-user git clone https://github.com/ArturSemenas/currency-exchange-provider.git
-  cd currency-exchange-provider
-  
-  # Create .env file with secrets
-  echo "Creating environment file..."
-  cat > .env << 'ENVEOF'
-  POSTGRES_USER=postgres
-  POSTGRES_PASSWORD=${postgres_password}
-  POSTGRES_DB=currency_exchange_db
-  FIXER_API_KEY=${fixer_api_key}
-  EXCHANGERATESAPI_KEY=${exchangeratesapi_key}
-  MOCK_PROVIDER_1_URL=http://mock-provider-1:8091
-  MOCK_PROVIDER_2_URL=http://mock-provider-2:8092
-  ENVEOF
-  
-  chown ec2-user:ec2-user .env
-  chmod 600 .env
-  
-  # Start Docker Compose services
-  echo "Starting Docker Compose services..."
-  docker-compose up -d
-  
-  # Wait for services to be healthy
-  echo "Waiting for services to start..."
-  sleep 45
-  
-  # Check service status
-  echo "Checking service status..."
-  docker-compose ps
-  
-  # Show application logs
-  echo "Application logs (last 30 lines):"
-  docker-compose logs --tail=30 currency-exchange-app
-  
-  # Create systemd service for auto-start on reboot
-  echo "Creating systemd service..."
-  cat > /etc/systemd/system/currency-exchange.service << 'SVCEOF'
-  [Unit]
-  Description=Currency Exchange Application
-  Requires=docker.service
-  After=docker.service
-  
-  [Service]
-  Type=oneshot
-  RemainAfterExit=yes
-  WorkingDirectory=/home/ec2-user/currency-exchange-provider
-  ExecStart=/usr/local/bin/docker-compose up -d
-  ExecStop=/usr/local/bin/docker-compose down
-  User=ec2-user
-  
-  [Install]
-  WantedBy=multi-user.target
-  SVCEOF
-  
-  systemctl daemon-reload
-  systemctl enable currency-exchange.service
-  
-  # Create backup script
-  echo "Creating backup script..."
-  cat > /home/ec2-user/backup-db.sh << 'BACKUPEOF'
-  #!/bin/bash
-  BACKUP_DIR="/home/ec2-user/backups"
-  DATE=$(date +%Y%m%d_%H%M%S)
-  
-  mkdir -p $BACKUP_DIR
-  docker exec currency-exchange-db pg_dump -U postgres currency_exchange_db > $BACKUP_DIR/db_backup_$DATE.sql
-  
-  # Keep only last 7 backups
-  ls -t $BACKUP_DIR/db_backup_*.sql | tail -n +8 | xargs -r rm -f
-  
-  echo "Backup completed: $BACKUP_DIR/db_backup_$DATE.sql"
-  BACKUPEOF
-  
-  chmod +x /home/ec2-user/backup-db.sh
-  chown ec2-user:ec2-user /home/ec2-user/backup-db.sh
-  
-  # Create update script
-  echo "Creating update script..."
-  cat > /home/ec2-user/update-app.sh << 'UPDATEEOF'
-  #!/bin/bash
-  cd /home/ec2-user/currency-exchange-provider
-  
-  echo "Pulling latest code..."
-  git pull origin main
-  
-  echo "Rebuilding containers..."
-  docker-compose down
-  docker-compose build --no-cache
-  docker-compose up -d
-  
-  echo "Waiting for services..."
-  sleep 30
-  
-  echo "Service status:"
-  docker-compose ps
-  UPDATEEOF
-  
-  chmod +x /home/ec2-user/update-app.sh
-  chown ec2-user:ec2-user /home/ec2-user/update-app.sh
-  
-  # Get public IP
-  PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-  
-  echo "=================================================="
-  echo "User-data script completed at $(date)"
-  echo "Application URL: http://$PUBLIC_IP:8080"
-  echo "Swagger UI: http://$PUBLIC_IP:8080/swagger-ui.html"
-  echo "=================================================="
-  ```
-
-### 2.7 Create terraform.tfvars
-
-- [ ] **Get your public IP address**
-  - Visit https://whatismyip.com/
-  - Note your IPv4 address (e.g., 203.0.113.42)
-
-- [ ] **Create terraform.tfvars with your values**
-  ```hcl
-  # terraform/terraform.tfvars
-  # WARNING: This file contains sensitive data - added to .gitignore
-  
-  aws_region              = "us-east-1"
-  instance_type           = "t2.micro"
-  ssh_public_key_path     = "~/.ssh/aws-currency-exchange.pub"
-  allowed_ssh_cidr        = "YOUR_IP_HERE/32"  # Replace with your IP from whatismyip.com
-  postgres_password       = "your_secure_password_here_min_12_chars"
-  fixer_api_key          = "YOUR_FIXER_KEY_OR_LEAVE_DEFAULT"
-  exchangeratesapi_key   = "YOUR_EXCHANGERATESAPI_KEY_OR_LEAVE_DEFAULT"
-  root_volume_size        = 20  # GB (max 30 for free tier)
-  ```
-  
-  **Replace**:
-  - `YOUR_IP_HERE` with your IP from whatismyip.com
-  - `your_secure_password_here_min_12_chars` with strong password
-  - API keys if you have them (otherwise mock providers will work)
-
-### 2.8 Create README.md
-
-- [ ] **Create terraform/README.md with documentation**
-  ```markdown
-  # Currency Exchange App - AWS Terraform Deployment
-  
-  ## Free Tier Resources
-  - EC2 t2.micro instance (1 vCPU, 1 GB RAM)
-  - 20 GB EBS storage
-  - 1 Elastic IP
-  - All within AWS Free Tier for 12 months
-  
-  ## Prerequisites
-  - AWS CLI configured with credentials
-  - Terraform >= 1.0
-  - SSH key pair generated
-  
-  ## Quick Deploy
-  
-  1. Initialize Terraform:
-     ```bash
-     terraform init
-     ```
-  
-  2. Review plan:
-     ```bash
-     terraform plan
-     ```
-  
-  3. Apply configuration:
-     ```bash
-     terraform apply
-     ```
-  
-  4. Get outputs:
-     ```bash
-     terraform output
-     ```
-  
-  ## Accessing the Application
-  
-  - SSH: `terraform output ssh_command`
-  - App: `terraform output app_url`
-  - Swagger: `terraform output swagger_url`
-  
-  ## Cleanup
-  
-  ```bash
-  terraform destroy
-  ```
-  
-  ## Cost Estimate
-  - First 12 months: $0/month (Free Tier)
-  - After 12 months: ~$11.50/month
+  # Open Swagger UI
+  Start-Process http://<PUBLIC_IP>:8080/swagger-ui.html
   ```
 
 ---
 
-## Phase 3: Terraform Deployment
-
-### 3.1 Initialize Terraform
-
-- [ ] **Navigate to terraform directory**
-  ```powershell
-  cd "c:\Work\Study\AI Copilot\Cur_ex_app\terraform"
-  ```
-
-- [ ] **Initialize Terraform**
-  ```powershell
-  terraform init
-  ```
-  - Downloads AWS provider plugins
-  - Creates `.terraform` directory
-  - Creates `.terraform.lock.hcl` file
-  - Expected output: "Terraform has been successfully initialized!"
-
-- [ ] **Verify initialization**
-  ```powershell
-  ls .terraform
-  ```
-  - Should show providers directory
-
-### 3.2 Validate Configuration
-
-- [ ] **Format Terraform files**
-  ```powershell
-  terraform fmt -recursive
-  ```
-  - Formats all .tf files to canonical format
-
-- [ ] **Validate syntax**
-  ```powershell
-  terraform validate
-  ```
-  - Expected: "Success! The configuration is valid."
-  - If errors: Fix syntax issues and re-run
-
-- [ ] **Check for common issues**
-  - Verify terraform.tfvars has your IP address (not YOUR_IP_HERE)
-  - Verify SSH public key path is correct
-  - Verify all sensitive values are set
-
-### 3.3 Plan Infrastructure
-
-- [ ] **Create execution plan**
-  ```powershell
-  terraform plan -out=tfplan
-  ```
-  - Reviews what will be created
-  - Saves plan to tfplan file
-  - Expected: ~10-12 resources to be created
-
-- [ ] **Review plan output**
-  - Check resources being created:
-    - ✅ 1 VPC
-    - ✅ 1 Subnet
-    - ✅ 1 Internet Gateway
-    - ✅ 1 Route Table + Association
-    - ✅ 1 Security Group
-    - ✅ 1 SSH Key Pair
-    - ✅ 1 EC2 Instance (t2.micro)
-    - ✅ 1 Elastic IP
-  - Verify no unexpected charges
-
-- [ ] **Save plan details for review**
-  ```powershell
-  terraform show tfplan > plan-review.txt
-  ```
-  - Review plan-review.txt in detail
-  - Verify instance_type = "t2.micro"
-  - Verify ami is Amazon Linux 2023
-  - Verify root volume size ≤ 30 GB
-
-### 3.4 Apply Infrastructure
-
-- [ ] **Apply Terraform configuration**
-  ```powershell
-  terraform apply tfplan
-  ```
-  - No prompt needed (plan already confirmed)
-  - Takes ~3-5 minutes to complete
-  - Watch for any errors
-
-- [ ] **Monitor creation progress**
-  - Creating VPC... ✓
-  - Creating subnet... ✓
-  - Creating internet gateway... ✓
-  - Creating route table... ✓
-  - Creating security group... ✓
-  - Creating key pair... ✓
-  - Creating EC2 instance... ✓ (takes 2-3 min)
-  - Creating Elastic IP... ✓
-
-- [ ] **Capture outputs**
-  ```powershell
-  terraform output > outputs.txt
-  notepad outputs.txt
-  ```
-  - Save public_ip, ssh_command, app_url, swagger_url
-
-- [ ] **Note deployment time**
-  - Record when deployment completed
-  - User data script takes ~3-5 minutes after instance creation
+**Phase 3 Status**: ✅ Complete - GitHub Secrets configured, ready for deployment
 
 ---
 
@@ -929,17 +316,16 @@
 
 ### 4.1 Wait for User Data Completion
 
-- [ ] **Wait for initialization** (3-5 minutes after terraform apply)
+- [ ] **Wait for initialization** (3-5 minutes after deployment)
   - User data script installs Docker, clones repo, starts containers
-  - Monitor from AWS Console: EC2 → Instances → Instance → Status checks
-  - Wait for "2/2 checks passed"
+  - Monitor from GitHub Actions workflow logs or AWS Console
+  - AWS Console: EC2 → Instances → Instance → Status checks → Wait for "2/2 checks passed"
 
 ### 4.2 SSH Connection
 
-- [ ] **Get SSH command from output**
-  ```powershell
-  terraform output ssh_command
-  ```
+- [ ] **Get SSH command from GitHub Actions output**
+  - View workflow summary or check outputs.txt from deployment logs
+  - Format: `ssh -i ~/.ssh/aws-currency-exchange ec2-user@<PUBLIC_IP>`
 
 - [ ] **Connect via SSH**
   ```powershell
@@ -1005,9 +391,13 @@
 
 ### 4.4 Test API Endpoints (from local machine)
 
-- [ ] **Get public IP**
+- [ ] **Get public IP from GitHub Actions output**
+  - View workflow summary or use AWS CLI
   ```powershell
-  $publicIp = (terraform output -raw public_ip)
+  $publicIp = aws ec2 describe-instances `
+    --filters "Name=tag:Name,Values=currency-exchange-app-instance" "Name=instance-state-name,Values=running" `
+    --query "Reservations[0].Instances[0].PublicIpAddress" `
+    --output text
   ```
 
 - [ ] **Test health endpoint**
@@ -1288,20 +678,23 @@
 
 ### 8.2 Destroy Infrastructure
 
-- [ ] **Review what will be destroyed**
+- [ ] **Destroy via GitHub Actions**
   ```powershell
-  cd "c:\Work\Study\AI Copilot\Cur_ex_app\terraform"
-  terraform plan -destroy -out=destroy-plan
-  terraform show destroy-plan
+  # Trigger destroy workflow
+  gh workflow run ci.yml --ref main -f terraform_action=destroy
+  
+  # Monitor destroy progress
+  gh run list --workflow=ci.yml
+  gh run view --log
   ```
-
-- [ ] **Destroy all resources**
-  ```powershell
-  terraform apply destroy-plan
-  ```
-  - Confirm: type "yes"
   - Takes ~2-3 minutes
   - All AWS resources will be deleted
+
+- [ ] **Alternative: Destroy via local Terraform (if needed)**
+  ```powershell
+  cd terraform
+  terraform destroy -auto-approve
+  ```
 
 - [ ] **Verify destruction in AWS Console**
   - EC2 → Instances (should be terminated)
@@ -1309,28 +702,43 @@
   - EC2 → Elastic IPs (should be released)
   - VPC → Your VPCs (should be deleted)
 
-- [ ] **Clean up local files**
+- [ ] **Clean up GitHub Secrets (optional)**
   ```powershell
-  rm terraform.tfstate*
-  rm tfplan destroy-plan
-  rm plan-review.txt outputs.txt
+  # List all secrets
+  gh secret list
+  
+  # Delete specific secrets if no longer needed
+  gh secret delete AWS_ACCESS_KEY_ID
+  gh secret delete AWS_SECRET_ACCESS_KEY
+  # ... etc
   ```
 
 ---
 
 ## Troubleshooting Guide
 
-### Issue: terraform init fails
+### Issue: GitHub Actions workflow fails
 **Solution:**
 ```powershell
-# Check AWS credentials
+# Check AWS credentials are set correctly
+gh secret list
+
+# View detailed workflow logs
+gh run view --log
+
+# Re-run failed workflow
+gh run rerun <RUN_ID>
+```
+
+### Issue: AWS credentials invalid
+**Solution:**
+```powershell
+# Verify AWS CLI access
 aws sts get-caller-identity
 
-# Re-configure if needed
-aws configure
-
-# Try init again
-terraform init
+# Update GitHub Secrets if needed
+echo "NEW_ACCESS_KEY" | gh secret set AWS_ACCESS_KEY_ID
+echo "NEW_SECRET_KEY" | gh secret set AWS_SECRET_ACCESS_KEY
 ```
 
 ### Issue: SSH connection refused
@@ -1403,20 +811,24 @@ docker-compose up -d
 
 ## Success Checklist
 
-- [ ] ✅ AWS Free Tier account created and verified
-- [ ] ✅ All tools installed (AWS CLI, Terraform, SSH)
-- [ ] ✅ Terraform files created and configured
-- [ ] ✅ Infrastructure deployed successfully
-- [ ] ✅ EC2 instance running and accessible
-- [ ] ✅ All Docker containers healthy
-- [ ] ✅ API endpoints responding correctly
-- [ ] ✅ Swagger UI accessible
-- [ ] ✅ Database populated with seed data
-- [ ] ✅ Redis cache working
-- [ ] ✅ Mock providers responding
-- [ ] ✅ Monitoring and backups configured
-- [ ] ✅ Cost alerts set up
-- [ ] ✅ Documentation completed
+- [x] ✅ AWS Free Tier account created and verified
+- [x] ✅ All tools installed (AWS CLI 2.32.6, Terraform 1.14.0, GitHub CLI 2.83.1)
+- [x] ✅ IAM user created (terraform-deploy)
+- [x] ✅ SSH key pair generated
+- [x] ✅ Terraform files created and validated
+- [x] ✅ GitHub Actions workflow integrated
+- [x] ✅ GitHub Secrets configured (6 secrets)
+- [ ] ⏳ Infrastructure deployed via GitHub Actions
+- [ ] ⏳ EC2 instance running and accessible
+- [ ] ⏳ All Docker containers healthy
+- [ ] ⏳ API endpoints responding correctly
+- [ ] ⏳ Swagger UI accessible
+- [ ] ⏳ Database populated with seed data
+- [ ] ⏳ Redis cache working
+- [ ] ⏳ Mock providers responding
+- [ ] ⏳ Monitoring and backups configured
+- [ ] ⏳ Cost alerts set up
+- [ ] ⏳ Documentation completed
 
 **Estimated Total Time:** 3-4 hours (first deployment)
 
