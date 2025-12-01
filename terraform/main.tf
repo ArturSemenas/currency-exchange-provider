@@ -14,32 +14,8 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Create IAM user for Terraform deployments
-resource "aws_iam_user" "terraform_deploy" {
-  name = "terraform-deploy"
-
-  tags = {
-    Purpose     = "Terraform automation"
-    Application = "currency-exchange-app"
-  }
-}
-
-# Attach EC2 full access policy
-resource "aws_iam_user_policy_attachment" "terraform_deploy_ec2" {
-  user       = aws_iam_user.terraform_deploy.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-}
-
-# Attach VPC full access policy
-resource "aws_iam_user_policy_attachment" "terraform_deploy_vpc" {
-  user       = aws_iam_user.terraform_deploy.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
-}
-
-# Create access key for the user
-resource "aws_iam_access_key" "terraform_deploy" {
-  user = aws_iam_user.terraform_deploy.name
-}
+# Note: IAM user 'terraform-deploy' must be created manually
+# with EC2FullAccess and VPCFullAccess policies before running Terraform
 
 # Data: Latest Amazon Linux 2023 AMI
 data "aws_ami" "amazon_linux_2023" {

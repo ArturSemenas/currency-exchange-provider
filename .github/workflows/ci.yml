@@ -277,7 +277,8 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-currency-exchange
-          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/aws-currency-exchange.pub
+          # Remove BOM from public key
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" | sed 's/^\xEF\xBB\xBF//' > ~/.ssh/aws-currency-exchange.pub
           chmod 600 ~/.ssh/aws-currency-exchange
           chmod 644 ~/.ssh/aws-currency-exchange.pub
 
