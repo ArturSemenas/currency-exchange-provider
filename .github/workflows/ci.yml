@@ -286,11 +286,17 @@ jobs:
         id: plan
         if: github.event.inputs.terraform_action == 'plan' || github.event.inputs.terraform_action == 'apply'
         run: terraform plan -out=tfplan
+        continue-on-error: true
 
       - name: Terraform Apply
         id: apply
-        if: github.event.inputs.terraform_action == 'apply'
+        if: github.event.inputs.terraform_action == 'apply' && steps.plan.outcome == 'success'
         run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Destroy on Plan Failure
+        id: destroy_on_failure
+        if: github.event.inputs.terraform_action == 'apply' && steps.plan.outcome == 'failure'
+        run: terraform destroy -auto-approve
 
       - name: Terraform Destroy
         id: destroy
@@ -298,7 +304,7 @@ jobs:
         run: terraform destroy -auto-approve
 
       - name: Output deployment results
-        if: github.event.inputs.terraform_action == 'apply'
+        if: github.event.inputs.terraform_action == 'apply' && steps.apply.outcome == 'success'
         run: |
           echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -306,6 +312,15 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           terraform output >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Output destroy on plan failure
+        if: github.event.inputs.terraform_action == 'apply' && steps.plan.outcome == 'failure'
+        run: |
+          echo "## ⚠️ Plan Failed - Infrastructure Cleaned Up" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Terraform plan failed. All partially created resources have been destroyed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action Required**: Fix the plan errors and re-run deployment." >> $GITHUB_STEP_SUMMARY
 
       - name: Output destroy results
         if: github.event.inputs.terraform_action == 'destroy'
