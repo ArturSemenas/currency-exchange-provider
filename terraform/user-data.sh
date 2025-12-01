@@ -24,26 +24,9 @@ echo "Docker versions:"
 docker --version
 docker-compose --version
 
-echo "Setting up SSH key for GitHub..."
-mkdir -p /home/ec2-user/.ssh
-echo "${github_deploy_key_b64}" | base64 -d > /home/ec2-user/.ssh/github-deploy-key
-chmod 600 /home/ec2-user/.ssh/github-deploy-key
-chown ec2-user:ec2-user /home/ec2-user/.ssh/github-deploy-key
-
-# Configure git to use the deploy key
-cat > /home/ec2-user/.ssh/config << 'SSHCFG'
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/github-deploy-key
-  StrictHostKeyChecking no
-SSHCFG
-chmod 600 /home/ec2-user/.ssh/config
-chown ec2-user:ec2-user /home/ec2-user/.ssh/config
-
 echo "Cloning repository..."
 cd /home/ec2-user
-sudo -u ec2-user git clone git@github.com:ArturSemenas/currency-exchange-provider.git
+sudo -u ec2-user git clone https://github.com/ArturSemenas/currency-exchange-provider.git
 cd currency-exchange-provider
 
 # Create environment file (mock providers)
