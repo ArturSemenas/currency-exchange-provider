@@ -174,7 +174,7 @@ resource "aws_instance" "app" {
     postgres_password    = var.postgres_password
     fixer_api_key        = var.fixer_api_key
     exchangeratesapi_key = var.exchangeratesapi_key
-    github_deploy_key    = var.github_deploy_key
+    github_deploy_key_b64 = var.github_deploy_key_b64
   })
 
   root_block_device {

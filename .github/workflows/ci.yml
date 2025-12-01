@@ -262,12 +262,12 @@ jobs:
         run: |
           # Remove BOM and whitespace from CIDR block
           CIDR=$(echo "${{ secrets.ALLOWED_SSH_CIDR }}" | sed 's/^\xEF\xBB\xBF//' | tr -d '\r' | xargs)
-          # Escape newlines in deploy key for tfvars
-          DEPLOY_KEY=$(echo "${{ secrets.DEPLOY_PRIVATE_KEY }}" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
+          # Base64 encode the deploy key to avoid multi-line issues
+          DEPLOY_KEY_B64=$(echo "${{ secrets.DEPLOY_PRIVATE_KEY }}" | base64 -w 0)
           cat > terraform.tfvars << EOF
           allowed_ssh_cidr     = "${CIDR}"
           postgres_password    = "${{ secrets.POSTGRES_PASSWORD }}"
-          github_deploy_key    = "${DEPLOY_KEY}"
+          github_deploy_key_b64 = "${DEPLOY_KEY_B64}"
           EOF
 
       - name: Setup SSH key

@@ -26,9 +26,7 @@ docker-compose --version
 
 echo "Setting up SSH key for GitHub..."
 mkdir -p /home/ec2-user/.ssh
-cat > /home/ec2-user/.ssh/github-deploy-key << 'SSHEOF'
-${github_deploy_key}
-SSHEOF
+echo "${github_deploy_key_b64}" | base64 -d > /home/ec2-user/.ssh/github-deploy-key
 chmod 600 /home/ec2-user/.ssh/github-deploy-key
 chown ec2-user:ec2-user /home/ec2-user/.ssh/github-deploy-key
 
