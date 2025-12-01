@@ -7,9 +7,9 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type (t2.micro for free tier)"
+  description = "EC2 instance type (t3.micro for eu-north-1 free tier)"
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "ssh_public_key_path" {
