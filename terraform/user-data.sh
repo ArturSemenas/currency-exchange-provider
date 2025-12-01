@@ -9,7 +9,7 @@ echo "=== User-data start $(date) ==="
 
 dnf update -y
 
-dnf install -y docker git wget curl
+dnf install -y docker git wget
 systemctl enable docker
 systemctl start docker
 
