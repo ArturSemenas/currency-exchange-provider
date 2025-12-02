@@ -337,7 +337,145 @@ jobs:
         if: |
           github.event.inputs.terraform_action == 'apply' && 
           (steps.plan.outcome == 'failure' || steps.apply.outcome == 'failure')
-        run: terraform destroy -auto-approve
+        run: |
+          echo "=== Deployment Failed - Starting Complete Cleanup ==="
+          
+          # Step 1: Run Terraform destroy
+          echo "Step 1: Running Terraform destroy..."
+          terraform destroy -auto-approve || echo "Terraform destroy completed with warnings"
+          
+          # Step 2: Terminate any remaining EC2 instances
+          echo "Step 2: Checking for orphaned EC2 instances..."
+          INSTANCES=$(aws ec2 describe-instances --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'Reservations[*].Instances[?State.Name!=`terminated`].InstanceId' \
+            --output text)
+          
+          if [ ! -z "$INSTANCES" ]; then
+            echo "Found instances to terminate: $INSTANCES"
+            aws ec2 terminate-instances --region eu-north-1 --instance-ids $INSTANCES
+            echo "Waiting for instances to terminate..."
+            aws ec2 wait instance-terminated --region eu-north-1 --instance-ids $INSTANCES || true
+            echo "✓ Instances terminated"
+          else
+            echo "✓ No orphaned instances found"
+          fi
+          
+          # Step 3: Delete SSH key pairs
+          echo "Step 3: Checking for orphaned SSH key pairs..."
+          KEYPAIRS=$(aws ec2 describe-key-pairs --region eu-north-1 \
+            --filters "Name=key-name,Values=currency-exchange-app-key" \
+            --query 'KeyPairs[*].KeyName' --output text)
+          
+          if [ ! -z "$KEYPAIRS" ]; then
+            echo "Deleting key pairs: $KEYPAIRS"
+            aws ec2 delete-key-pair --region eu-north-1 --key-name $KEYPAIRS
+            echo "✓ Key pairs deleted"
+          fi
+          
+          # Step 4: Get VPC IDs for cleanup
+          VPC_IDS=$(aws ec2 describe-vpcs --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'Vpcs[].VpcId' --output text)
+          
+          if [ -z "$VPC_IDS" ]; then
+            echo "✓ No VPCs found - cleanup complete"
+            exit 0
+          fi
+          
+          echo "Found VPCs to clean: $VPC_IDS"
+          
+          # Step 5: Detach and delete internet gateways
+          echo "Step 5: Detaching and deleting internet gateways..."
+          for VPC_ID in $VPC_IDS; do
+            IGW_IDS=$(aws ec2 describe-internet-gateways --region eu-north-1 \
+              --filters "Name=attachment.vpc-id,Values=$VPC_ID" \
+              --query 'InternetGateways[].InternetGatewayId' --output text)
+            
+            for IGW_ID in $IGW_IDS; do
+              echo "  Detaching IGW $IGW_ID from VPC $VPC_ID"
+              aws ec2 detach-internet-gateway --region eu-north-1 --internet-gateway-id $IGW_ID --vpc-id $VPC_ID 2>/dev/null || true
+              aws ec2 delete-internet-gateway --region eu-north-1 --internet-gateway-id $IGW_ID 2>/dev/null || true
+            done
+          done
+          
+          # Step 6: Delete subnets
+          echo "Step 6: Deleting subnets..."
+          for VPC_ID in $VPC_IDS; do
+            SUBNET_IDS=$(aws ec2 describe-subnets --region eu-north-1 \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query 'Subnets[].SubnetId' --output text)
+            
+            for SUBNET_ID in $SUBNET_IDS; do
+              echo "  Deleting subnet $SUBNET_ID"
+              aws ec2 delete-subnet --region eu-north-1 --subnet-id $SUBNET_ID 2>/dev/null || true
+            done
+          done
+          
+          # Step 7: Disassociate and delete route tables (non-main)
+          echo "Step 7: Deleting route tables..."
+          for VPC_ID in $VPC_IDS; do
+            RT_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' \
+              --output text)
+            
+            for RT_ID in $RT_IDS; do
+              echo "  Processing route table $RT_ID"
+              # Disassociate all subnet associations
+              ASSOC_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
+                --route-table-ids $RT_ID \
+                --query 'RouteTables[0].Associations[?!Main].RouteTableAssociationId' \
+                --output text)
+              
+              for ASSOC_ID in $ASSOC_IDS; do
+                aws ec2 disassociate-route-table --region eu-north-1 --association-id $ASSOC_ID 2>/dev/null || true
+              done
+              
+              sleep 2
+              aws ec2 delete-route-table --region eu-north-1 --route-table-id $RT_ID 2>/dev/null || true
+            done
+          done
+          
+          # Step 8: Wait and retry security groups
+          echo "Step 8: Deleting security groups..."
+          sleep 5
+          SG_IDS=$(aws ec2 describe-security-groups --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'SecurityGroups[?GroupName!=`default`].GroupId' \
+            --output text)
+          
+          for SG_ID in $SG_IDS; do
+            for i in 1 2 3; do
+              if aws ec2 delete-security-group --region eu-north-1 --group-id $SG_ID 2>/dev/null; then
+                echo "✓ Deleted security group $SG_ID"
+                break
+              else
+                [ $i -lt 3 ] && sleep 5
+              fi
+            done
+          done
+          
+          # Step 9: Delete VPCs
+          echo "Step 9: Deleting VPCs..."
+          sleep 5
+          for VPC_ID in $VPC_IDS; do
+            for i in 1 2 3 4 5; do
+              if aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null; then
+                echo "✓ Deleted VPC $VPC_ID"
+                break
+              else
+                if [ $i -lt 5 ]; then
+                  echo "Retry $i/5 for VPC $VPC_ID..."
+                  sleep 5
+                else
+                  echo "⚠ Could not delete VPC $VPC_ID - manual cleanup may be required"
+                fi
+              fi
+            done
+          done
+          
+          echo "=== Cleanup on Failure Complete ==="
 
       - name: Terraform Refresh State
         id: refresh
