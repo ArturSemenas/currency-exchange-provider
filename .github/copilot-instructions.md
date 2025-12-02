@@ -1,7 +1,7 @@
 # Currency Exchange Rates Provider Service - Instructions
 
 ## Overview
-Spring Boot 3.4.1 application providing currency exchange rates from 4 providers (Fixer.io, ExchangeRatesAPI, and 2 mock providers). Features include dynamic currency management, hourly updates, Redis caching, and multi-provider aggregation.
+Spring Boot 3.4.1 application providing currency exchange rates from 4 providers (Fixer.io, ExchangeRatesAPI, and 2 mock providers). Features include dynamic currency management, hourly updates, Redis caching, and multi-provider aggregation. Successfully deployed to AWS EC2 (eu-north-1) with automated CI/CD pipeline.
 
 ## Tech Stack
 - **Java 21**, **Maven**, **Spring Boot 3.4.1**
@@ -39,6 +39,8 @@ Spring Boot 3.4.1 application providing currency exchange rates from 4 providers
 - **Validation**: Custom annotations for currency and period.
 - **Testing**: 359 tests (336 unit, 23 integration), 87% coverage.
 - **Code Quality**: Checkstyle, PMD, JaCoCo.
+- **AWS Deployment**: Automated CI/CD with GitHub Actions, Terraform infrastructure, EC2 t3.micro (eu-north-1).
+- **Docker**: 3-service setup (main app, PostgreSQL, Redis) optimized for 1GB memory.
 
 ## Project Structure
 - **src/main**: Core application (clients, controllers, services, etc.).
@@ -52,8 +54,10 @@ mvn pmd:check
 ```
 
 ## Current Status
-✅ **Phases 1-15 Complete**: Core features, security, Docker, testing, and quality gates implemented.  
+✅ **Phases 1-17 Complete**: Core features, security, Docker, testing, quality gates, and AWS deployment implemented.  
 📊 **Test Coverage**: 87% overall.  
 🔐 **Security**: Role-based model without ROLE_ prefix.  
 🔌 **4-Provider Integration**: Fixer.io, ExchangeRatesAPI, mock-provider-1, mock-provider-2.  
-📝 **Next Steps**: Performance optimization, monitoring, GraphQL support.
+☁️ **AWS Deployment**: Running on EC2 t3.micro in eu-north-1 (Stockholm), Terraform-managed infrastructure, GitHub Actions CI/CD.  
+🐳 **Production Optimization**: 3-container setup (690MB used / 904MB total) - mock services excluded for memory constraints.  
+📝 **Next Steps**: Performance optimization, monitoring, cost optimization, GraphQL support.

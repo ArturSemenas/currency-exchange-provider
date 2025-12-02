@@ -1,6 +1,6 @@
 # Currency Exchange Rates Provider Service
 
-A production-ready Spring Boot 3.4.1 application that provides up-to-date currency exchange rates from multiple providers with Redis caching, rate aggregation, trend analysis, and comprehensive testing.
+A production-ready Spring Boot 3.4.1 application that provides up-to-date currency exchange rates from multiple providers with Redis caching, rate aggregation, trend analysis, and comprehensive testing. Deployed to AWS EC2 with automated CI/CD pipeline and Terraform-managed infrastructure.
 
 ## 🚀 Features
 
@@ -21,6 +21,9 @@ A production-ready Spring Boot 3.4.1 application that provides up-to-date curren
 - **Code Quality Gates** - Checkstyle, PMD, JaCoCo coverage tracking
 - **Full Docker Support** - Multi-container setup with health checks and networking
 - **OpenAPI Documentation** - Interactive Swagger UI with authentication support
+- **AWS Deployment** - Terraform-managed EC2 infrastructure in eu-north-1 (Stockholm)
+- **CI/CD Pipeline** - GitHub Actions with automated deployment and infrastructure management
+- **Production Optimized** - Memory-efficient 3-container setup (app + PostgreSQL + Redis) for t3.micro
 
 ## 📋 Technology Stack
 
@@ -439,14 +442,16 @@ docker-compose up -d currency-exchange-app
 
 ### Docker Services
 
-| Service | Port | Description |
-|---------|------|-------------|
-| `currency-exchange-app` | 8080 | Main Spring Boot application |
-| `postgres` | 5432 | PostgreSQL 17 database |
-| `redis` | 6379 | Redis 7 cache |
-| `mock-provider-1` | 8091 | Mock Fixer.io simulation |
-| `mock-provider-2` | 8092 | Mock ExchangeRatesAPI simulation |
-| `pgadmin` | 5050 | PostgreSQL web UI |
+| Service | Port | Description | Production |
+|---------|------|-------------|------------|
+| `currency-exchange-app` | 8080 | Main Spring Boot application | ✅ Running |
+| `postgres` | 5432 | PostgreSQL 17 database | ✅ Running |
+| `redis` | 6379 | Redis 7 cache | ✅ Running |
+| `mock-provider-1` | 8091 | Mock Fixer.io simulation | ❌ Excluded (memory) |
+| `mock-provider-2` | 8092 | Mock ExchangeRatesAPI simulation | ❌ Excluded (memory) |
+| `pgadmin` | 5050 | PostgreSQL web UI | ❌ Excluded (memory) |
+
+**Note**: Mock providers and pgAdmin are excluded from AWS EC2 deployment due to t3.micro (1GB) memory constraints. Production uses real API providers (Fixer.io, ExchangeRatesAPI).
 
 ### Health Checks
 
@@ -900,10 +905,109 @@ server.port=8081
 - **Swagger UI**: Use http://localhost:8080/swagger-ui.html for API exploration
 - **Database**: Use pgAdmin at http://localhost:5050 to inspect database state
 
+## ☁️ AWS Deployment
+
+### Infrastructure
+
+The application is deployed to AWS using Terraform and GitHub Actions CI/CD:
+
+- **Region**: eu-north-1 (Stockholm, Sweden)
+- **Instance**: EC2 t3.micro (1GB RAM, 2 vCPUs) - Free tier eligible
+- **Storage**: 30GB gp3 volume
+- **OS**: Amazon Linux 2023
+- **State Management**: S3 backend with DynamoDB locking
+- **Network**: VPC with IPv6, security groups for SSH/HTTP/HTTPS
+
+### CI/CD Pipeline
+
+**GitHub Actions Workflow** (`.github/workflows/ci.yml`):
+1. **Build & Test** - Maven build with unit and integration tests
+2. **Code Quality** - Checkstyle, PMD, JaCoCo analysis
+3. **Docker Build** - Multi-stage Dockerfile optimization
+4. **Terraform Deploy** - Infrastructure provisioning with retry logic
+5. **Application Deploy** - Docker Compose with 3 services
+6. **Auto-Destroy** - Comprehensive cleanup on failure (9-step process)
+
+### Deployment Commands
+
+**Deploy to AWS**:
+```bash
+gh workflow run ci.yml -f terraform_action=apply
+```
+
+**Destroy Infrastructure**:
+```bash
+gh workflow run ci.yml -f terraform_action=destroy
+```
+
+### Production Configuration
+
+**Memory Optimization** (t3.micro 1GB RAM):
+- Main application: 512MB JVM heap, Serial GC
+- PostgreSQL 16: ~150MB
+- Redis 7: ~50MB
+- **Total**: ~690MB used (70MB available)
+
+**Excluded Services** (insufficient memory):
+- pgAdmin (web UI)
+- mock-provider-1 and mock-provider-2
+
+**Environment Variables** (configured in user-data.sh):
+- Database: POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+- Redis: SPRING_DATA_REDIS_HOST, SPRING_DATA_REDIS_PORT
+- APIs: FIXER_API_KEY, EXCHANGERATESAPI_KEY
+
+### Monitoring & Health Checks
+
+**Application Health**:
+```bash
+curl http://<EC2-IP>:8080/actuator/health
+```
+
+**Docker Logs**:
+```bash
+ssh ec2-user@<EC2-IP>
+docker logs currency-exchange-app --tail 100
+```
+
+**Resource Monitoring**:
+```bash
+free -h  # Memory usage
+docker stats  # Container resource usage
+```
+
+### Terraform Resources
+
+- VPC with public subnet and IPv6
+- EC2 instance with user data bootstrap
+- Security groups (SSH, HTTP, HTTPS, App port 8080)
+- Internet Gateway for public access
+- Route tables with IPv4 and IPv6 routes
+
+### Cost Optimization
+
+✅ **Free Tier Compliance**:
+- t3.micro: 750 hours/month (always free first year)
+- 30GB gp3 storage: Within 30GB free tier
+- S3 state backend: 5GB free tier
+- DynamoDB locking: Always free tier (25GB, 200M requests)
+- **Estimated Cost**: $0/month (within free tier limits)
+
+### Infrastructure as Code
+
+**Files**:
+- `terraform/main.tf` - Core infrastructure resources
+- `terraform/variables.tf` - Configuration variables
+- `terraform/user-data.sh` - EC2 bootstrap script
+- `.github/workflows/ci.yml` - CI/CD pipeline
+
+See **[AWS_DEPLOYMENT_TODO.md](AWS_DEPLOYMENT_TODO.md)** for deployment checklist and **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** for debugging guide.
+
 ## 📖 Additional Documentation
 
 - **[DOCKER.md](DOCKER.md)** - Comprehensive Docker deployment guide
 - **[MOCK_PROVIDERS.md](MOCK_PROVIDERS.md)** - Mock exchange rate providers documentation
+- **[AWS_DEPLOYMENT_TODO.md](AWS_DEPLOYMENT_TODO.md)** - AWS deployment checklist and guide
 - **[Swagger UI](http://localhost:8080/swagger-ui.html)** - Interactive API documentation
 - **[OpenAPI Spec](http://localhost:8080/v3/api-docs)** - OpenAPI 3.0 specification
 
@@ -924,6 +1028,10 @@ server.port=8081
 ✅ MapStruct type-safe DTO mapping  
 ✅ Global exception handling  
 ✅ Custom validators for currency codes and periods  
+✅ AWS EC2 deployment with Terraform  
+✅ GitHub Actions CI/CD pipeline  
+✅ Production memory optimization (3-container setup)  
+✅ Automated infrastructure provisioning and cleanup  
 
 ## 📝 License
 
