@@ -40,5 +40,9 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with reduced memory footprint for t3.micro (1GB RAM)
+# -Xmx384m: Max heap 384MB (leaves room for OS, Docker, other containers)
+# -Xms256m: Initial heap 256MB
+# -XX:MaxMetaspaceSize=128m: Limit metaspace to 128MB
+# -XX:+UseSerialGC: Use Serial GC (lower memory overhead than G1GC)
+ENTRYPOINT ["java", "-Xmx384m", "-Xms256m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]

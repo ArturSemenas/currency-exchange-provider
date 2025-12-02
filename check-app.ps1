@@ -1,5 +1,5 @@
 # Quick diagnostic script for currency exchange app on AWS
-$instanceIP = "16.171.110.181"
+$instanceIP = "13.60.4.112"
 $sshKey = "$env:USERPROFILE\.ssh\aws-currency-exchange"
 
 Write-Host "`n=== Checking Currency Exchange Application ===" -ForegroundColor Cyan

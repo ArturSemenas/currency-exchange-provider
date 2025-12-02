@@ -8,4 +8,5 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/mock-provider-1-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8091
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Reduced memory for t3.micro: 128MB max heap, 64MB metaspace
+ENTRYPOINT ["java", "-Xmx128m", "-Xms64m", "-XX:MaxMetaspaceSize=64m", "-XX:+UseSerialGC", "-jar", "app.jar"]
