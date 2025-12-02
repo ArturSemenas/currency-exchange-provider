@@ -1,7 +1,7 @@
 package com.currencyexchange.provider.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +15,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Service for caching exchange rates in Redis
  * Storage structure: Hash with key "rates:{baseCurrency}", field "{targetCurrency}", value "{rate}"
+ * Falls back gracefully if Redis is not available
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ExchangeRateCacheService {
     
     private static final String RATES_KEY_PREFIX = "rates:";
     private static final long TTL_HOURS = 2;
     
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate;
     
     /**
      * Store exchange rates for a base currency
@@ -33,6 +34,11 @@ public class ExchangeRateCacheService {
      * @param rates map of target currency codes to exchange rates
      */
     public void storeRates(String baseCurrency, Map<String, BigDecimal> rates) {
+        if (redisTemplate == null) {
+            log.debug("Redis not available, skipping cache storage for {}", baseCurrency);
+            return;
+        }
+        
         try {
             String key = RATES_KEY_PREFIX + baseCurrency;
             
@@ -57,6 +63,11 @@ public class ExchangeRateCacheService {
      * @param bestRates map of base currency to map of target currencies to rates
      */
     public void storeBestRates(Map<String, Map<String, BigDecimal>> bestRates) {
+        if (redisTemplate == null) {
+            log.debug("Redis not available, skipping cache storage for best rates");
+            return;
+        }
+        
         try {
             bestRates.forEach(this::storeRates);
             log.info("Stored best rates for {} base currencies", bestRates.size());
@@ -73,6 +84,10 @@ public class ExchangeRateCacheService {
      * @return Optional containing the rate if found in cache
      */
     public Optional<BigDecimal> getRate(String baseCurrency, String targetCurrency) {
+        if (redisTemplate == null) {
+            return Optional.empty();
+        }
+        
         try {
             String key = RATES_KEY_PREFIX + baseCurrency;
             Object rate = redisTemplate.opsForHash().get(key, targetCurrency);
@@ -101,6 +116,10 @@ public class ExchangeRateCacheService {
      * @return map of target currencies to rates, or empty map if not in cache
      */
     public Map<String, BigDecimal> getAllRates(String baseCurrency) {
+        if (redisTemplate == null) {
+            return Map.of();
+        }
+        
         try {
             String key = RATES_KEY_PREFIX + baseCurrency;
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
@@ -157,6 +176,11 @@ public class ExchangeRateCacheService {
      * Evict all cached rates
      */
     public void evictAll() {
+        if (redisTemplate == null) {
+            log.debug("Redis not available, skipping cache eviction");
+            return;
+        }
+        
         try {
             Set<String> keys = redisTemplate.keys(RATES_KEY_PREFIX + "*");
             if (keys != null && !keys.isEmpty()) {
@@ -174,6 +198,11 @@ public class ExchangeRateCacheService {
      * @param baseCurrency the base currency code
      */
     public void evictRates(String baseCurrency) {
+        if (redisTemplate == null) {
+            log.debug("Redis not available, skipping cache eviction for {}", baseCurrency);
+            return;
+        }
+        
         try {
             String key = RATES_KEY_PREFIX + baseCurrency;
             Boolean deleted = redisTemplate.delete(key);
@@ -192,6 +221,10 @@ public class ExchangeRateCacheService {
      * @return true if Redis is reachable
      */
     public boolean isAvailable() {
+        if (redisTemplate == null) {
+            return false;
+        }
+        
         try {
             redisTemplate.getConnectionFactory().getConnection().ping();
             return true;

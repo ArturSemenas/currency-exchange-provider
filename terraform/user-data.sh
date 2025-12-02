@@ -34,10 +34,13 @@ cat > .env << 'ENVEOF'
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=${postgres_password}
 POSTGRES_DB=currency_exchange_db
+REDIS_HOST=redis
+REDIS_PORT=6379
+SPRING_DATA_REDIS_HOST=redis
+SPRING_DATA_REDIS_PORT=6379
 FIXER_API_KEY=${fixer_api_key}
 EXCHANGERATESAPI_KEY=${exchangeratesapi_key}
-MOCK_PROVIDER_1_URL=http://mock-provider-1:8091
-MOCK_PROVIDER_2_URL=http://mock-provider-2:8092
+SPRING_PROFILES_ACTIVE=prod
 ENVEOF
 
 chown ec2-user:ec2-user .env

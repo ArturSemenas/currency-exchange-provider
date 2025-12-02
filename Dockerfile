@@ -41,8 +41,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 # Run the application with reduced memory footprint for t3.micro (1GB RAM)
-# -Xmx384m: Max heap 384MB (leaves room for OS, Docker, other containers)
-# -Xms256m: Initial heap 256MB
+# -Xmx512m: Max heap 512MB (no mock services, more room available)
+# -Xms384m: Initial heap 384MB
 # -XX:MaxMetaspaceSize=128m: Limit metaspace to 128MB
 # -XX:+UseSerialGC: Use Serial GC (lower memory overhead than G1GC)
-ENTRYPOINT ["java", "-Xmx384m", "-Xms256m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx512m", "-Xms384m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]
