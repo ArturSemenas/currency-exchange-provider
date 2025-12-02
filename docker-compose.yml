@@ -63,8 +63,6 @@ services:
       FIXER_API_BASE_URL: ${FIXER_API_BASE_URL:-http://data.fixer.io/api}
       EXCHANGERATESAPI_KEY: ${EXCHANGERATESAPI_KEY:-your-api-key-here}
       EXCHANGERATESAPI_BASE_URL: ${EXCHANGERATESAPI_BASE_URL:-https://api.exchangeratesapi.io/v1}
-      MOCK_PROVIDER_1_URL: ${MOCK_PROVIDER_1_URL:-http://mock-provider-1:8091}
-      MOCK_PROVIDER_2_URL: ${MOCK_PROVIDER_2_URL:-http://mock-provider-2:8092}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
     networks:
       - currency-exchange-network
@@ -73,10 +71,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mock-provider-1:
-        condition: service_healthy
-      mock-provider-2:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -84,36 +78,6 @@ services:
       retries: 5
       start_period: 60s
     restart: unless-stopped
-
-  mock-provider-1:
-    build:
-      context: ./mock-services/mock-provider-1
-      dockerfile: Dockerfile
-    container_name: mock-provider-1
-    ports:
-      - "8091:8091"
-    networks:
-      - currency-exchange-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8091/api/v1/latest"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  mock-provider-2:
-    build:
-      context: ./mock-services/mock-provider-2
-      dockerfile: Dockerfile
-    container_name: mock-provider-2
-    ports:
-      - "8092:8092"
-    networks:
-      - currency-exchange-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8092/v1/latest"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
   postgres_data:
