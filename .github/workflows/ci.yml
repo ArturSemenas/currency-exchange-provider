@@ -339,10 +339,45 @@ jobs:
           (steps.plan.outcome == 'failure' || steps.apply.outcome == 'failure')
         run: terraform destroy -auto-approve
 
+      - name: Terraform Refresh State
+        id: refresh
+        if: github.event.inputs.terraform_action == 'destroy'
+        run: |
+          echo "Refreshing Terraform state to sync with actual AWS resources..."
+          terraform refresh -auto-approve || echo "Refresh completed with warnings"
+
       - name: Terraform Destroy
         id: destroy
         if: github.event.inputs.terraform_action == 'destroy'
-        run: terraform destroy -auto-approve
+        run: |
+          echo "Destroying infrastructure..."
+          terraform destroy -auto-approve
+          
+          # Verify all resources are gone
+          echo "Verifying cleanup..."
+          INSTANCES=$(aws ec2 describe-instances --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'Reservations[*].Instances[?State.Name!=`terminated`].InstanceId' \
+            --output text)
+          
+          if [ ! -z "$INSTANCES" ]; then
+            echo "Warning: Found remaining instances: $INSTANCES"
+            echo "Terminating manually..."
+            aws ec2 terminate-instances --region eu-north-1 --instance-ids $INSTANCES
+          fi
+          
+          # Check for orphaned key pairs
+          KEYPAIRS=$(aws ec2 describe-key-pairs --region eu-north-1 \
+            --filters "Name=key-name,Values=currency-exchange-app-key" \
+            --query 'KeyPairs[*].KeyName' --output text)
+          
+          if [ ! -z "$KEYPAIRS" ]; then
+            echo "Warning: Found orphaned key pair: $KEYPAIRS"
+            echo "Deleting manually..."
+            aws ec2 delete-key-pair --region eu-north-1 --key-name $KEYPAIRS
+          fi
+          
+          echo "✅ Cleanup complete"
 
       - name: Output deployment results
         if: github.event.inputs.terraform_action == 'apply' && steps.apply.outcome == 'success'
