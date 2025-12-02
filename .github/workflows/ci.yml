@@ -344,7 +344,8 @@ jobs:
         if: github.event.inputs.terraform_action == 'destroy'
         run: |
           echo "Refreshing Terraform state to sync with actual AWS resources..."
-          terraform refresh -auto-approve || echo "Refresh completed with warnings"
+          terraform refresh || echo "Refresh completed with warnings"
+        continue-on-error: true
 
       - name: Terraform Destroy
         id: destroy
@@ -468,9 +469,23 @@ jobs:
           # Step 8: Retry security group deletion (after other resources are gone)
           echo "Step 8: Retrying security group deletion..."
           if [ ! -z "$SG_IDS" ]; then
-            sleep 5
+            echo "Waiting 10 seconds for network interfaces to fully detach..."
+            sleep 10
             for SG_ID in $SG_IDS; do
-              aws ec2 delete-security-group --region eu-north-1 --group-id $SG_ID 2>/dev/null && echo "✓ Deleted $SG_ID" || echo "Could not delete $SG_ID"
+              # Try up to 3 times with increasing delays
+              for i in 1 2 3; do
+                if aws ec2 delete-security-group --region eu-north-1 --group-id $SG_ID 2>/dev/null; then
+                  echo "✓ Deleted $SG_ID"
+                  break
+                else
+                  if [ $i -lt 3 ]; then
+                    echo "Retry $i/3 for $SG_ID (waiting 5s)..."
+                    sleep 5
+                  else
+                    echo "⚠ Could not delete $SG_ID after 3 attempts"
+                  fi
+                fi
+              done
             done
           fi
           
@@ -478,7 +493,20 @@ jobs:
           echo "Step 9: Deleting VPCs..."
           for VPC_ID in $VPC_IDS; do
             echo "Deleting VPC: $VPC_ID"
-            aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null && echo "✓ Deleted VPC $VPC_ID" || echo "Could not delete VPC $VPC_ID"
+            # Try up to 3 times with delays
+            for i in 1 2 3; do
+              if aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null; then
+                echo "✓ Deleted VPC $VPC_ID"
+                break
+              else
+                if [ $i -lt 3 ]; then
+                  echo "Retry $i/3 for VPC $VPC_ID (waiting 5s)..."
+                  sleep 5
+                else
+                  echo "⚠ Could not delete VPC $VPC_ID after 3 attempts"
+                fi
+              fi
+            done
           done
           
           echo ""
