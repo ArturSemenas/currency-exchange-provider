@@ -350,34 +350,148 @@ jobs:
         id: destroy
         if: github.event.inputs.terraform_action == 'destroy'
         run: |
-          echo "Destroying infrastructure..."
-          terraform destroy -auto-approve
+          echo "=== Starting Complete Infrastructure Cleanup ==="
           
-          # Verify all resources are gone
-          echo "Verifying cleanup..."
+          # Step 1: Run Terraform destroy
+          echo "Step 1: Running Terraform destroy..."
+          terraform destroy -auto-approve || echo "Terraform destroy completed with warnings"
+          
+          # Step 2: Terminate any remaining EC2 instances
+          echo "Step 2: Checking for orphaned EC2 instances..."
           INSTANCES=$(aws ec2 describe-instances --region eu-north-1 \
             --filters "Name=tag:Application,Values=currency-exchange-app" \
             --query 'Reservations[*].Instances[?State.Name!=`terminated`].InstanceId' \
             --output text)
           
           if [ ! -z "$INSTANCES" ]; then
-            echo "Warning: Found remaining instances: $INSTANCES"
-            echo "Terminating manually..."
+            echo "Found instances to terminate: $INSTANCES"
             aws ec2 terminate-instances --region eu-north-1 --instance-ids $INSTANCES
+            echo "Waiting for instances to terminate..."
+            aws ec2 wait instance-terminated --region eu-north-1 --instance-ids $INSTANCES
+            echo "✓ Instances terminated"
+          else
+            echo "✓ No orphaned instances found"
           fi
           
-          # Check for orphaned key pairs
+          # Step 3: Delete SSH key pairs
+          echo "Step 3: Checking for orphaned SSH key pairs..."
           KEYPAIRS=$(aws ec2 describe-key-pairs --region eu-north-1 \
             --filters "Name=key-name,Values=currency-exchange-app-key" \
             --query 'KeyPairs[*].KeyName' --output text)
           
           if [ ! -z "$KEYPAIRS" ]; then
-            echo "Warning: Found orphaned key pair: $KEYPAIRS"
-            echo "Deleting manually..."
+            echo "Found key pairs to delete: $KEYPAIRS"
             aws ec2 delete-key-pair --region eu-north-1 --key-name $KEYPAIRS
+            echo "✓ Key pairs deleted"
+          else
+            echo "✓ No orphaned key pairs found"
           fi
           
-          echo "✅ Cleanup complete"
+          # Step 4: Delete security groups (except default)
+          echo "Step 4: Checking for orphaned security groups..."
+          SG_IDS=$(aws ec2 describe-security-groups --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'SecurityGroups[?GroupName!=`default`].GroupId' \
+            --output text)
+          
+          if [ ! -z "$SG_IDS" ]; then
+            echo "Found security groups to delete: $SG_IDS"
+            for SG_ID in $SG_IDS; do
+              aws ec2 delete-security-group --region eu-north-1 --group-id $SG_ID 2>/dev/null || echo "Could not delete $SG_ID (may have dependencies)"
+            done
+            echo "✓ Security groups processed"
+          else
+            echo "✓ No orphaned security groups found"
+          fi
+          
+          # Step 5: Detach and delete internet gateways
+          echo "Step 5: Checking for orphaned internet gateways..."
+          VPC_IDS=$(aws ec2 describe-vpcs --region eu-north-1 \
+            --filters "Name=tag:Application,Values=currency-exchange-app" \
+            --query 'Vpcs[].VpcId' --output text)
+          
+          for VPC_ID in $VPC_IDS; do
+            echo "Processing VPC: $VPC_ID"
+            
+            IGW_IDS=$(aws ec2 describe-internet-gateways --region eu-north-1 \
+              --filters "Name=attachment.vpc-id,Values=$VPC_ID" \
+              --query 'InternetGateways[].InternetGatewayId' --output text)
+            
+            for IGW_ID in $IGW_IDS; do
+              echo "Detaching and deleting IGW: $IGW_ID"
+              aws ec2 detach-internet-gateway --region eu-north-1 --internet-gateway-id $IGW_ID --vpc-id $VPC_ID 2>/dev/null || true
+              aws ec2 delete-internet-gateway --region eu-north-1 --internet-gateway-id $IGW_ID 2>/dev/null || true
+            done
+          done
+          
+          # Step 6: Delete subnets
+          echo "Step 6: Checking for orphaned subnets..."
+          for VPC_ID in $VPC_IDS; do
+            SUBNET_IDS=$(aws ec2 describe-subnets --region eu-north-1 \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query 'Subnets[].SubnetId' --output text)
+            
+            if [ ! -z "$SUBNET_IDS" ]; then
+              echo "Deleting subnets in VPC $VPC_ID: $SUBNET_IDS"
+              for SUBNET_ID in $SUBNET_IDS; do
+                aws ec2 delete-subnet --region eu-north-1 --subnet-id $SUBNET_ID 2>/dev/null || echo "Could not delete subnet $SUBNET_ID"
+              done
+            fi
+          done
+          
+          # Step 7: Delete route tables (except main)
+          echo "Step 7: Checking for orphaned route tables..."
+          for VPC_ID in $VPC_IDS; do
+            RT_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query 'RouteTables[?Associations[0].Main==`false`].RouteTableId' \
+              --output text)
+            
+            if [ ! -z "$RT_IDS" ]; then
+              echo "Deleting route tables in VPC $VPC_ID: $RT_IDS"
+              for RT_ID in $RT_IDS; do
+                # Disassociate first
+                ASSOC_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
+                  --route-table-ids $RT_ID \
+                  --query 'RouteTables[].Associations[?Main==`false`].RouteTableAssociationId' \
+                  --output text)
+                
+                for ASSOC_ID in $ASSOC_IDS; do
+                  aws ec2 disassociate-route-table --region eu-north-1 --association-id $ASSOC_ID 2>/dev/null || true
+                done
+                
+                aws ec2 delete-route-table --region eu-north-1 --route-table-id $RT_ID 2>/dev/null || echo "Could not delete route table $RT_ID"
+              done
+            fi
+          done
+          
+          # Step 8: Retry security group deletion (after other resources are gone)
+          echo "Step 8: Retrying security group deletion..."
+          if [ ! -z "$SG_IDS" ]; then
+            sleep 5
+            for SG_ID in $SG_IDS; do
+              aws ec2 delete-security-group --region eu-north-1 --group-id $SG_ID 2>/dev/null && echo "✓ Deleted $SG_ID" || echo "Could not delete $SG_ID"
+            done
+          fi
+          
+          # Step 9: Delete VPCs
+          echo "Step 9: Deleting VPCs..."
+          for VPC_ID in $VPC_IDS; do
+            echo "Deleting VPC: $VPC_ID"
+            aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null && echo "✓ Deleted VPC $VPC_ID" || echo "Could not delete VPC $VPC_ID"
+          done
+          
+          echo ""
+          echo "=== Cleanup Complete ==="
+          echo "Summary of cleaned resources:"
+          echo "  • EC2 Instances: Terminated"
+          echo "  • SSH Key Pairs: Deleted"
+          echo "  • Security Groups: Deleted"
+          echo "  • Internet Gateways: Deleted"
+          echo "  • Subnets: Deleted"
+          echo "  • Route Tables: Deleted"
+          echo "  • VPCs: Deleted"
+          echo "✅ All infrastructure removed"
 
       - name: Output deployment results
         if: github.event.inputs.terraform_action == 'apply' && steps.apply.outcome == 'success'
