@@ -29,6 +29,9 @@ cd /home/ec2-user
 sudo -u ec2-user git clone https://github.com/ArturSemenas/currency-exchange-provider.git
 cd currency-exchange-provider
 
+# Get instance public IP for Swagger configuration
+INSTANCE_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
 # Create environment file (mock providers)
 cat > .env << 'ENVEOF'
 POSTGRES_USER=postgres
@@ -42,6 +45,9 @@ FIXER_API_KEY=${fixer_api_key}
 EXCHANGERATESAPI_KEY=${exchangeratesapi_key}
 SPRING_PROFILES_ACTIVE=prod
 ENVEOF
+
+# Add SERVER_URL to .env
+echo "SERVER_URL=http://$INSTANCE_IP:8080" >> .env
 
 chown ec2-user:ec2-user .env
 chmod 600 .env
