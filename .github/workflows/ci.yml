@@ -443,25 +443,46 @@ jobs:
           # Step 7: Delete route tables (except main)
           echo "Step 7: Checking for orphaned route tables..."
           for VPC_ID in $VPC_IDS; do
+            # Get all route tables (non-main)
             RT_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
               --filters "Name=vpc-id,Values=$VPC_ID" \
-              --query 'RouteTables[?Associations[0].Main==`false`].RouteTableId' \
+              --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' \
               --output text)
             
             if [ ! -z "$RT_IDS" ]; then
-              echo "Deleting route tables in VPC $VPC_ID: $RT_IDS"
+              echo "Found route tables in VPC $VPC_ID: $RT_IDS"
               for RT_ID in $RT_IDS; do
-                # Disassociate first
+                # First, disassociate all subnet associations
+                echo "Disassociating route table $RT_ID..."
                 ASSOC_IDS=$(aws ec2 describe-route-tables --region eu-north-1 \
                   --route-table-ids $RT_ID \
-                  --query 'RouteTables[].Associations[?Main==`false`].RouteTableAssociationId' \
+                  --query 'RouteTables[0].Associations[?!Main].RouteTableAssociationId' \
                   --output text)
                 
-                for ASSOC_ID in $ASSOC_IDS; do
-                  aws ec2 disassociate-route-table --region eu-north-1 --association-id $ASSOC_ID 2>/dev/null || true
-                done
+                if [ ! -z "$ASSOC_IDS" ]; then
+                  for ASSOC_ID in $ASSOC_IDS; do
+                    echo "  Disassociating $ASSOC_ID..."
+                    aws ec2 disassociate-route-table --region eu-north-1 --association-id $ASSOC_ID 2>/dev/null || echo "  Could not disassociate $ASSOC_ID"
+                  done
+                  # Wait a moment for disassociations to complete
+                  sleep 2
+                fi
                 
-                aws ec2 delete-route-table --region eu-north-1 --route-table-id $RT_ID 2>/dev/null || echo "Could not delete route table $RT_ID"
+                # Try to delete the route table up to 3 times
+                echo "Deleting route table $RT_ID..."
+                for i in 1 2 3; do
+                  if aws ec2 delete-route-table --region eu-north-1 --route-table-id $RT_ID 2>/dev/null; then
+                    echo "✓ Deleted route table $RT_ID"
+                    break
+                  else
+                    if [ $i -lt 3 ]; then
+                      echo "Retry $i/3 for route table $RT_ID (waiting 3s)..."
+                      sleep 3
+                    else
+                      echo "⚠ Could not delete route table $RT_ID after 3 attempts"
+                    fi
+                  fi
+                done
               done
             fi
           done
@@ -491,23 +512,32 @@ jobs:
           
           # Step 9: Delete VPCs
           echo "Step 9: Deleting VPCs..."
-          for VPC_ID in $VPC_IDS; do
-            echo "Deleting VPC: $VPC_ID"
-            # Try up to 3 times with delays
-            for i in 1 2 3; do
-              if aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null; then
-                echo "✓ Deleted VPC $VPC_ID"
-                break
-              else
-                if [ $i -lt 3 ]; then
-                  echo "Retry $i/3 for VPC $VPC_ID (waiting 5s)..."
-                  sleep 5
+          if [ ! -z "$VPC_IDS" ]; then
+            echo "Waiting 5 seconds for route table deletions to propagate..."
+            sleep 5
+            
+            for VPC_ID in $VPC_IDS; do
+              echo "Deleting VPC: $VPC_ID"
+              # Try up to 5 times with delays
+              for i in 1 2 3 4 5; do
+                if aws ec2 delete-vpc --region eu-north-1 --vpc-id $VPC_ID 2>/dev/null; then
+                  echo "✓ Deleted VPC $VPC_ID"
+                  break
                 else
-                  echo "⚠ Could not delete VPC $VPC_ID after 3 attempts"
+                  if [ $i -lt 5 ]; then
+                    echo "Retry $i/5 for VPC $VPC_ID (waiting 5s)..."
+                    sleep 5
+                  else
+                    echo "⚠ Could not delete VPC $VPC_ID after 5 attempts"
+                    # List remaining dependencies
+                    echo "Checking remaining dependencies for VPC $VPC_ID:"
+                    aws ec2 describe-route-tables --region eu-north-1 --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].[RouteTableId]' --output text || true
+                    aws ec2 describe-network-interfaces --region eu-north-1 --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[].NetworkInterfaceId' --output text || true
+                  fi
                 fi
-              fi
+              done
             done
-          done
+          fi
           
           echo ""
           echo "=== Cleanup Complete ==="
